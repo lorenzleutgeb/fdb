@@ -1,0 +1,74 @@
+\documentclass[a4paper,12pt]{article} 
+
+\usepackage[a4paper, top=3cm, bottom=3cm, left=2cm, right=2cm]{geometry}
+\usepackage{amsmath}
+\usepackage{cmap}					% поиск в PDF
+\usepackage[utf8]{inputenc}			% кодировка исходного текста
+\usepackage[english]{babel}     	% локализация и переносы
+\usepackage{csquotes}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Foundations of Databases}\\[3mm]
+
+{\Large Coursework 1}\\[5mm]
+
+Lorenz Leutgeb\\\texttt{lorenz.leutgeb@stud-inf.unibz.it}\\[2mm]
+Anastassiya Pustozerova\\\texttt{anastassiya.pustozerova@stud-inf.unibz.it}
+\end{center}
+
+\subsection*{1. Finite vs. Infinite Satisfiability}
+
+\begin{enumerate}
+	\item $\phi:= (\forall x) (\forall y) (x = y)$
+	\item{The following sentence requires models to interpret some $R(a, b)$ as being \emph{true}, which \enquote{kickstarts} an infinite chain of $R$-related objects, thus an infinite domain.
+	\begin{align*}
+		\psi := & (\exists x) (\exists y) R(x,y) \\
+		\land & (\forall x)\big(\lnot R(x,x)\big) && R \text{ is irreflexive} \\
+		\land & (\forall x)(\forall y)(\forall z) \big(\lnot(R(x,y) \land R(y,z)) \lor R(x,z)\big) && R \text{ is transitive}\\
+		\land & (\forall x)(\forall y) \big(\lnot R(x,y) \lor R(y,x)\big) && R \text{ is antisymmetric}
+	\end{align*}}
+\end{enumerate}
+
+
+\subsection*{2. Finite vs. Database Satisfiability}
+
+\begin{enumerate}
+	\item $\phi:= (\forall x) R(x)$
+	\item Since $\psi$ is database satisfiable, there exist a database instance such that $ I \models \psi $. Take an interpretation $J$ as a copy of $I$ but with the restricted domain $\Delta_J = \mathit{adom}(\psi) \cap \Delta_I$ (in slight abuse of notation since $\psi$ is not a query but a first-order sentence). Then, since $\mathit{adom}(\psi)$ is finite,  $J$ is a finite model for $\psi$, thus $\psi$ is finitely satisfiable.
+\end{enumerate}
+
+\subsection*{3. Positive Queries}
+
+\begin{enumerate}
+	\item Satisfiability of positive queries is decidable. An algorithm that decides satisfiability of positive queries is rather simple: Return \enquote{yes}. This reminds us a little of the description logic $\mathcal{EL}$ which cannot express negation (though it does not allow for disjunction).
+	\item Positive queries are not safe in general. Counterexample: $$q := \{ x, y, z \mid R(x,y) \lor R(y,z) \}$$
+\end{enumerate}
+
+\subsection*{3. Query Semantics and Integrity Constraints}
+
+\begin{enumerate}
+	\item To see $Q_1 \not \sqsubseteq Q_2$ and $Q_2 \not \sqsubseteq Q_1$ Consider the database instance \begin{align*}\textbf{I} = \{ &\mathsf{S}(\mathsf{CineplexxBolzano}, \mathsf{ReservoirDogs}), \mathsf{S}(\mathsf{UCIBolzano}, \mathsf{ReservoirDogs}),&\\ &\mathsf{S}(\mathsf{UCIBolzano}, \mathsf{FourRooms}), \mathsf{S}(\mathsf{CineforumBolzano}, \mathsf{Coco}),&\\ &\mathsf{M}(\mathsf{ReservoirDogs}, \mathsf{Tarantino}), \mathsf{M}(\mathsf{FourRooms}, \mathsf{Tarantino}),\\ &\mathsf{M}(\mathsf{FourRooms}, \mathsf{Rodriguez})\}\end{align*}
+	
+	The respective answers are:
+	\begin{align*}
+		Q_1(\textbf{I}) =& \{ (\mathsf{CineplexxBolzano}), (\mathsf{UCIBolzano}) \} \\
+		Q_2(\textbf{I}) =& \{ (\mathsf{CineplexxBolzano}), (\mathsf{CineforumBolzano}) \}
+	\end{align*}
+
+	\item We summarize our findings:
+		\begin{table}[h!]
+		\begin{center}
+		\begin{tabular}{|c|c|c|c|}
+			\hline
+			& $\textbf{I} \models \gamma_K$ & $\textbf{I} \models \gamma_{FK}$ & $\textbf{I} \models \gamma_K \wedge \gamma_{FK}$ \\
+			\hline
+			$Q_1 \stackrel{?}{\sqsubseteq} Q_2$ & yes & no & yes \\
+			$Q_2 \stackrel{?}{\sqsubseteq} Q_1$ & no & yes & yes \\
+			\hline
+		\end{tabular}
+		\end{center}
+		\end{table}
+\end{enumerate}
+\end{document}
