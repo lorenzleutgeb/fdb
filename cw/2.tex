@@ -1,0 +1,160 @@
+\documentclass[a4paper,12pt]{article} 
+
+\usepackage[a4paper, top=3cm, bottom=3cm, left=2cm, right=2cm]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{cmap}					% поиск в PDF
+\usepackage[utf8]{inputenc}			% кодировка исходного текста
+\usepackage[english]{babel}     	% локализация и переносы
+\usepackage{csquotes}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+\usepackage[ruled,linesnumbered]{algorithm2e}
+
+\newtheorem{claim}{Claim}
+
+\newcommand{\cq}[1]{\ensuremath{\mathsf{CQ}_{#1}}}
+\newcommand{\query}[3]{\ensuremath{{#1}({#2})\:{:}{-}\:{#3}}}
+\newcommand{\rr}{\mathsf{RangeRestricted}}
+\renewcommand{\phi}{\varphi}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Foundations of Databases}\\[3mm]
+
+{\Large Coursework 2}\\[5mm]
+
+Lorenz Leutgeb\\\texttt{lorenz.leutgeb@stud-inf.unibz.it}\\[2mm]
+Anastassiya Pustozerova\\\texttt{anastassiya.pustozerova@stud-inf.unibz.it}
+\end{center}
+
+\subsection*{1. Safety of Positive Queries}
+
+\begin{enumerate}
+
+\item The safety of simple positive queries is decidable. We use use an approach very similar to the one deciding safety of formulae in safe-range normal form (SRNF) presented in the lecture to decide safety.
+
+Rename variables in $\phi$ apart (such that each variable $x$ is quantified at most once and has only free or only bound occurrences). This rewriting yields $\tilde{\phi}$ in simple and positive SRNF (same as SRNF, but without negation and without built-ins like equality). Renaming variables apart does not influence safety of the formula.
+
+$\phi$ is safe if and only-if $\rr(\tilde{\phi})$ returns the set of all free variables of $\tilde{\phi}$.
+
+\begin{algorithm}
+  \KwIn{A formula $\phi$ in simple positive SRNF.}
+  \KwOut{A subset of the free variables of $\phi$, or $\bot$, indicating that a quantified variable is not range restricted.}
+  \Switch{$\phi$}{
+  	\uCase{$R(t_1,...,t_n)$}{\Return{the set of variables from $t_1,\dots,t_n$}}
+  	\uCase{$\psi_1 \land \psi_2$}{\Return{$\rr(\psi_1) \cup \rr(\psi_2)$}}
+  	\uCase{$\psi_1 \lor \psi_2$}{\Return{$\rr(\psi_1) \cap \rr(\psi_2)$}}
+  	\uCase{$\exists{x} \: \psi$}{
+  		\uIf{$x \in \rr(\psi)$}{
+  			\Return{$\rr(\psi) \setminus \{x\}$}
+  		}
+  		\Else{
+  			\Return{$\bot$ \tcp{$S \cup \bot = S \cap \bot = \bot$}}
+  		}
+  	}
+  }
+  \caption{$\rr(\phi)$}
+\end{algorithm}
+
+\item Every safe simple positive query is domain independent. 
+
+By the safe range theorem all safe range queries are domain independent.
+\end{enumerate}
+
+\subsection*{2. Unions of Conjunctive Queries}
+
+\begin{claim}
+Adding union to simple conjunctive queries strictly increases expressivity of the resulting language.
+\end{claim}
+
+\begin{proof}
+We show by contradiction that there is a union of simple conjunctive queries $Q(x)$ that cannot be expressed by a simple conjunctive query. Let
+\begin{align*}
+\query{Q}{x}{p(x)} && \query{Q}{x}{r(x)}
+\end{align*}
+and assume that the simple conjunctive query $\query{Q'}{x}{L'}$ is equivalent to $Q(x)$ towards a contradiction.
+
+Since $Q(x)$ and $Q(x)$ are equivalent by assumption, $Q(\textbf{I}) = Q'(\textbf{I})$ for any database instance $\textbf{I}$ by definition of query evaluation. In the following we consider the instance $\textbf{I}_Q = \{ r(c_{x_1}), p(c_{x_2}) \}$. Observe $\{ (c_{x_1}), (c_{x_2}) \} = Q(\textbf{I}_Q) = Q'(\textbf{I}_Q)$. By definition of answer tuples there are $\alpha_1$, $\alpha_2$ such that
+\begin{align*}
+\alpha_1(x) &= c_{x_1} &
+\alpha_1(L') &\subseteq \textbf{I}_Q \\
+\alpha_2(x) &= c_{x_2} &
+\alpha_2(L') &\subseteq \textbf{I}_Q
+\end{align*}
+From the above properties of $\alpha_1$ we have that $p(x) \in L'$ and analogously using the above properties of $\alpha_2$ we have $r(x) \in L'$. Together, we have $\{ r(x), p(x) \} \subseteq L'$.
+
+However, this yields a contradiction since $\{p(c_{x_1})\} \subseteq \alpha_1(L') \not \subseteq \textbf{I}_Q$ and analogously $\{r(c_{x_2})\} \subseteq \alpha_2(L') \not \subseteq \textbf{I}_Q$. This closes our proof by showing the opposite of what was assumed, i.e.\ that there is no simple conjunctive query equivalent to $Q(x)$.
+\end{proof}
+
+\subsection*{3. Classes of Conjunctive Queries}
+
+$\cq{} \subseteq \cq{=}$ since \cq{} is the more specific subset of queries inside \cq{=} that do not have equality atoms in the body. The inclusion is obvious.
+
+Next, we consider inclusions between \cq{}, \cq{rep}, \cq{const} and \cq{rep,const}.
+$\cq{} subseteq \cq{rep} \subseteq \cq{rep,const}$ since \cq{} is the more specific subset of queries inside \cq{rep} that have no repetitions in the head, and \cq{rep} is the more specific subset of queries inside \cq{rep,const} that have no constants in the head. These inclusions are obvious.
+$\cq{} \subseteq \cq{const} \subseteq \cq{rep,const}$ since \cq{} is the more specific subset of queries inside \cq{const} that have no constants in the head, and \cq{const} is the more specific subset of queries inside \cq{rep,const} that have no repetitions in the head. These inclusions are obvious.
+
+To show $\cq{=} \subseteq \cq{rep,const}$ let $Q(\bar{x}) :- L, M$ where $Q(x) \in \cq{=}$ and $n$ be the number of (distinct) inequality atoms in $Q$. We use $M = \{ x_i = y_i \mid 1 \leq i \leq n\}$ to denote the set of equality atoms in $Q$. Without loss of generality we assume that for all equality atoms in $M$ the following holds: (a.) If one of the two terms occurring in the equality atom is a constant, then it is to the right of the equality symbol. (b.) If $x = y$ is in $M$ then $y = x$ is not in $M$ (some ordering on variables is respected). We transform $Q(x)$ into an equivalent query $Q'(x') :- L'$ where $Q'(x) \in \cq{rep,const}$ as follows: We take the set of relational atoms $L$ from $Q$ and translate it to a set of relational atoms $L'$ for $Q'$ by considering $M$. For every equality $x_i = y_i$ in $M$, the relational atoms in $L$ are rewritten by replacing $x_i$ with $y_i$. In a similar way, occurences of $x_i$ in the head of $Q$, are replaced by $y_i$ to yield the head of $Q'$. For example:
+
+\begin{align}
+Q(x,y,z) :- R(x,y), Q(y,z), x = y, z = c \\
+Q'(x,x,c) :- R(x,x), Q(x,c)
+\end{align}
+
+Applying this process in reverse (eliminating repetition/constants in the head by introducing a new variable and an equality atom) shows how to translate a query in \cq{rep,const} to a query in \cq{=}, therefore $\cq{=} \supseteq \cq{rep,const}$.
+
+Together with $\cq{rep} \subseteq \cq{rep,const}$ and $\cq{const} \subseteq \cq{rep,const}$ we have $\cq{=} \supset \cq{rep}$ and $\cq{=} \supset \cq{const}$.
+
+3 Repetition does not really increase expressivity (duplicate query):
+To remove repeated variables, introduce new variables and alias them using =.
+$\cq{}    \subseteq \cq{rep}$
+$\cq{rep} \subseteq \cq{}$
+
+$\cq{const} \not \supseteq \cq{rep,const}$
+
+$\cq{=} \not \subseteq \cq{rep}$ by counterexample: For the query $Q(x) :- x = c$ there is no equivalent query in \cq{rep}.
+
+$\cq{=} \not \subseteq \cq{const}$ by counterexample: For the query $Q(x,y) :- x = y$ there is no equivalent query in \cq{const}.
+
+$\cq{} \not \supseteq \cq{const}$ by counterexample: For the query $Q(c) :- R(y)$ there is no equivalent query in \cq{}. 
+
+$\cq{} \not \supseteq \cq{rep}$ by counterexample: For the query $Q(x,x) :- R(x)$ there is no equivalent query in \cq{}.
+
+$\cq{rep} \not \supseteq \cq{rep,const}$ by counterexample: For the query $Q(x,x,c) :- R(x)$ there is no equivalent query in \cq{}.
+
+$\cq{const} \not \supseteq \cq{rep,const}$ by counterexample: For the query $Q(x,x,c) :- R(x)$ there is no equivalent query in \cq{}.
+
+Remaining:
+$\cq{} \not \supseteq \cq{=}$
+
+We use the result $\cq{} = \cq{=}$.
+
+\begin{center}
+\begin{tabular}{|l|cccc|}
+\hline
+               &       \cq{=} &     \cq{rep} &   \cq{const} & \cq{rep,const} \\
+\hline
+\cq{}          & $\subsetneq$ & $\subsetneq$ & $\subsetneq$ &   $\subsetneq$ \\
+\cq{=}         &              & $\supsetneq$ & $\supsetneq$ &              = \\
+\cq{rep}       &              &              &              &   $\supsetneq$ \\
+\cq{const}     &              &              &              &   $\supsetneq$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\begin{center}
+\begin{tikzpicture}
+		\node (t)                          {\cq{=}, \cq{rep,const}};
+		\node (l) [below left =1.5cm of t] {\cq{rep}};
+		\node (r) [below right=1.5cm of t] {\cq{const}};
+		\node (b) [below      =  3cm of t] {\cq{}};
+		\draw (b) -> (l);
+		\draw (b) -> (r);
+		\draw (l) -> (t);
+		\draw (r) -> (t);
+\end{tikzpicture}
+\end{center}
+
+\end{document}
