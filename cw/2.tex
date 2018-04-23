@@ -9,13 +9,17 @@
 \usepackage{tikz}
 \usetikzlibrary{positioning}
 
+\bibliographystyle{abbrv}
+
 \usepackage[ruled,linesnumbered]{algorithm2e}
 
 \newtheorem{claim}{Claim}
 
 \newcommand{\cq}[1]{\ensuremath{\mathsf{CQ}_{#1}}}
 \newcommand{\query}[3]{\ensuremath{{#1}({#2})\:{:}{-}\:{#3}}}
-\newcommand{\rr}{\mathsf{RangeRestricted}}
+\newcommand{\rr}{\mathsf{RR}}
+\newcommand{\ranf}{\mathsf{RANF}}
+\newcommand{\srnf}{\mathsf{SRNF}}
 \renewcommand{\phi}{\varphi}
 
 \begin{document}
@@ -29,19 +33,21 @@ Lorenz Leutgeb\\\texttt{lorenz.leutgeb@stud-inf.unibz.it}\\[2mm]
 Anastassiya Pustozerova\\\texttt{anastassiya.pustozerova@stud-inf.unibz.it}
 \end{center}
 
-\subsection*{1. Safety of Positive Queries}
+\section{Safety of Positive Queries}
 
-\begin{enumerate}
+\begin{claim}
+The safety of simple positive queries is decidable.
+\end{claim}
 
-\item The safety of simple positive queries is decidable. We use use an approach very similar to the one deciding safety of formulae in safe-range normal form (SRNF) presented in the lecture to decide safety.
+\begin{proof}[Sketch of Proof] We specify an algorithm. Similar to the approach presented in the lecture we first translate $\phi$ into a normal form to allow for a concise rule-based formulation.
 
-Rename variables in $\phi$ apart (such that each variable $x$ is quantified at most once and has only free or only bound occurrences). This rewriting yields $\tilde{\phi}$ in simple and positive SRNF (same as SRNF, but without negation and without built-ins like equality). Renaming variables apart does not influence safety of the formula.
+We choose (a subset of) SRNF as our normal form, and re-use the algorithm given in \cite[Section 5.4, p.\ 83]{alice} to translate a simple positive formula to SRNF. We call it $\srnf$. Note that some rules of this algorithm will never be applicable to simple positive formulae: universal quantification, implication and negation are not included in the definition of simple positive formulae. This hints why we only need to consider a subset of SRNF, intuitively \emph{simple positive SRNF}. Also note that the rewrite rules preserve equivalence and therefore $\phi$ is safe if and only-if $\srnf(\phi)$ is safe.
 
-$\phi$ is safe if and only-if $\rr(\tilde{\phi})$ returns the set of all free variables of $\tilde{\phi}$.
+From here, we can use $\srnf$ and the algorithm below (adapted from \cite[Algorithm 5.4.3, p.\ 84]{alice} to decide safety of formulae in simple positive SRNF) to decide safety of simple positive formulae: A simple positive formula $\phi$ is safe if and only-if $\rr(\srnf(\phi))$ returns the set of all free variables of $\phi$.
 
 \begin{algorithm}
   \KwIn{A formula $\phi$ in simple positive SRNF.}
-  \KwOut{A subset of the free variables of $\phi$, or $\bot$, indicating that a quantified variable is not range restricted.}
+  \KwOut{The subset of free variables of $\phi$ that are range-restricted, or $\bot$, indicating that a quantified variable is not range restricted.}
   \Switch{$\phi$}{
   	\uCase{$R(t_1,...,t_n)$}{\Return{the set of variables from $t_1,\dots,t_n$}}
   	\uCase{$\psi_1 \land \psi_2$}{\Return{$\rr(\psi_1) \cup \rr(\psi_2)$}}
@@ -51,19 +57,38 @@ $\phi$ is safe if and only-if $\rr(\tilde{\phi})$ returns the set of all free va
   			\Return{$\rr(\psi) \setminus \{x\}$}
   		}
   		\Else{
-  			\Return{$\bot$ \tcp{$S \cup \bot = S \cap \bot = \bot$}}
+  			\Return{$\bot$ ~ ~ ~ \textnormal{Note that $\bot \cup S = \bot \cap S = \bot - S = \bot - S = \bot$ for any set $S$.}}
   		}
   	}
   }
   \caption{$\rr(\phi)$}
 \end{algorithm}
 
-\item Every safe simple positive query is domain independent. 
+Termination can be shown by induction over the structure of $\phi$. Or top-down since the number of subformulae of $\phi$ is finite and $\rr$ is recursively called on these subformulae, with termination in case of atoms (see case $R(t_1,...,t_n)$ above).
+\end{proof}
 
-By the safe range theorem all safe range queries are domain independent.
-\end{enumerate}
+\begin{claim}
+Every safe simple positive query is domain independent. 
+\end{claim}
 
-\subsection*{2. Unions of Conjunctive Queries}
+\begin{proof}[Sketch of Proof]
+By the safe range theorem all safe range queries are domain independent. Since we consider positive simple SRNF in the above Sketch of Proof it is applicable here. However, we elaborate by specifying an algorithm that translates a formula in simple positive SRNF into simple positive RANF (a subset of relational algebra normal form, RANF). In a further step we show that these formulae can be translated into corresponding relational algebra expressions for which safety is known.
+
+The trasnlation to simple positive RANF given is similar to \cite[Algorithm 5.4.7, p.\ 88]{alice}. Note that we do not consider $\land$ and $\lor$ in their polyadic form but only their binary form, and we also do not consider existential quantification over a sequence of variables (of the form $\exists{x_1, \dots, x_n}$ or $\exists{\vec{x}}$) but only for single variables, i.e.\ of the form $\exists{x}$. We trade a more concise notation of rules for an increase in the number of applications of these rules.
+
+\begin{algorithm}
+  \KwIn{A formula $\phi$ in simple positive SRNF.}
+  \KwOut{A formula $\phi'$ in RANF, equivalent to $\phi$.}
+  \While{some subformula $\psi$ (with its conjuncts possibly reordered) of $\phi$ satisfies the premise of R1 or R2}{
+  \Switch{depending on premises of R1 or R2}{
+  	\uCase{$\psi = \psi_1 \land \cdots \land \psi_2 \land \exists{x} \: \xi$ where $\rr(\psi)$ is the set of free variables in $\psi$ but $rr(\xi)$ is not the set of free variables in $\xi$}{Replace $\psi$ by $\srnf(\psi)$\\$\phi := $ result of replacing $\psi$ by $\psi'$ in $\phi$} %TODO
+  	\uCase{R2 applicable}{Push-into-quantifier} %TODO
+  }}
+  \caption{$\ranf(\phi)$}
+\end{algorithm}
+\end{proof}
+
+\section{Unions of Conjunctive Queries}
 
 \begin{claim}
 Adding union to simple conjunctive queries strictly increases expressivity of the resulting language.
@@ -88,7 +113,7 @@ From the above properties of $\alpha_1$ we have that $p(x) \in L'$ and analogous
 However, this yields a contradiction since $\{p(c_{x_1})\} \subseteq \alpha_1(L') \not \subseteq \textbf{I}_Q$ and analogously $\{r(c_{x_2})\} \subseteq \alpha_2(L') \not \subseteq \textbf{I}_Q$. This closes our proof by showing the opposite of what was assumed, i.e.\ that there is no simple conjunctive query equivalent to $Q(x)$.
 \end{proof}
 
-\subsection*{3. Classes of Conjunctive Queries}
+\section{Classes of Conjunctive Queries}
 
 $\cq{} \subseteq \cq{=}$ since \cq{} is the more specific subset of queries inside \cq{=} that do not have equality atoms in the body. The inclusion is obvious.
 
@@ -156,5 +181,7 @@ We use the result $\cq{} = \cq{=}$.
 		\draw (r) -> (t);
 \end{tikzpicture}
 \end{center}
+
+\bibliography{2}
 
 \end{document}
