@@ -88,6 +88,32 @@ The trasnlation to simple positive RANF given is similar to \cite[Algorithm 5.4.
 \end{algorithm}
 \end{proof}
 
+
+This algorithm can be used to transform a SRNF formula into a RANF formula.
+
+\begin{proof}[Proof]
+	
+	If formula $\phi$ in SRNF is not in RANF, then one of the rewrite rules $(R1, R2)$ can be applied. Algorithm terminates: each successfully completed call to algorithm reduces the number of non-self-contained subformulas, and if a call to algorithm on $\psi$ invokes other calls to algorithm, the input to these recursive calls has fewer non-selfcontained subformulas than does $\psi$.
+\end{proof}
+
+Every RANF formula can be transformed into equivalent relational algebra query.
+
+For given RANF formula $\phi$ with free variables $x_1,...,x_n$, we shall construct a named algebra expression $E_\phi$ over attributes $x_1,...,x_n$ such that for each input instance $I$, $E_\phi(I) = \{x_1,...,x_n |~\phi\}(I)$. (The special case of queries $\{e_1,...,e_n | \phi\}$, where some of the $e_i$ are constants, is handled by performing a join with the constants at the end of the construction.)
+
+\begin{algorithm}
+	\KwIn{A formula $\phi$ in RANF.}
+	\KwOut{An algebra query $E_\phi$ equivalent to $\phi$.}
+	{
+		\uCase{$\phi=R(\vec{e})$}{$\delta_f(\pi_k(\sigma_F(R)))$} 
+		\uCase{$\phi=\psi \land \xi$}{$E_\phi \bowtie E_\xi $}
+		\uCase{$\phi=\psi_1 \lor \psi_2$}{$E_\phi \cup E_\xi $}
+		\uCase{$\phi=\exists x_1, ..., x_n \psi(x_1,...x_n,y_1,..,y_k)$}{$\pi_{y_1,...,y_k}(E_\psi) $} 
+	}
+	\caption{}
+\end{algorithm}
+
+Show that $\phi$ and $E\phi$ are equivalent.
+
 \section{Unions of Conjunctive Queries}
 
 \begin{claim}
