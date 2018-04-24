@@ -52,13 +52,11 @@ From here, we can use $\srnf$ and the algorithm below (adapted from \cite[Algori
   	\uCase{$R(t_1,...,t_n)$}{\Return{the set of variables from $t_1,\dots,t_n$}}
   	\uCase{$\psi_1 \land \psi_2$}{\Return{$\rr(\psi_1) \cup \rr(\psi_2)$}}
   	\uCase{$\psi_1 \lor \psi_2$}{\Return{$\rr(\psi_1) \cap \rr(\psi_2)$}}
-  	\uCase{$\exists{x} \: \psi$}{
-  		\uIf{$x \in \rr(\psi)$}{
+  	\Case{$\exists{x} \: \psi$}{
+  		\If{$x \in \rr(\psi)$}{
   			\Return{$\rr(\psi) \setminus \{x\}$}
   		}
-  		\Else{
-  			\Return{$\bot$ ~ ~ ~ \textnormal{Note that $\bot \cup S = \bot \cap S = \bot - S = \bot - S = \bot$ for any set $S$.}}
-  		}
+  		\Return{$\bot$ ~ ~ ~ \textnormal{Note that $\bot \cup S = \bot \cap S = \bot - S = \bot - S = \bot$ for any set $S$.}}
   	}
   }
   \caption{$\rr(\phi)$}
@@ -74,45 +72,47 @@ Every safe simple positive query is domain independent.
 \begin{proof}[Sketch of Proof]
 By the safe range theorem all safe range queries are domain independent. Since we consider positive simple SRNF in the above Sketch of Proof it is applicable here. However, we elaborate by specifying an algorithm that translates a formula in simple positive SRNF into simple positive RANF (a subset of relational algebra normal form, RANF). In a further step we show that these formulae can be translated into corresponding relational algebra expressions for which safety is known.
 
-The trasnlation to simple positive RANF given is similar to \cite[Algorithm 5.4.7, p.\ 88]{alice}. Note that we do not consider $\land$ and $\lor$ in their polyadic form but only their binary form, and we also do not consider existential quantification over a sequence of variables (of the form $\exists{x_1, \dots, x_n}$ or $\exists{\vec{x}}$) but only for single variables, i.e.\ of the form $\exists{x}$. We trade a more concise notation of rules for an increase in the number of applications of these rules.
+The translation to simple positive RANF given is similar to \cite[Algorithm 5.4.7, p.\ 88]{alice}. Note that we do not consider $\land$ and $\lor$ in their polyadic form but only their binary form, and we also do not consider existential quantification over a sequence of variables (of the form $\exists{x_1, \dots, x_n}$ or $\exists{\vec{x}}$) but only for single variables, i.e.\ of the form $\exists{x}$. We trade a more concise notation of rules for an increase in the number of applications of these rules.
 
 \begin{algorithm}
-  \KwIn{A formula $\phi$ in simple positive SRNF.}
-  \KwOut{A formula $\phi'$ in RANF, equivalent to $\phi$.}
-  \While{some subformula $\psi$ (with its conjuncts possibly reordered) of $\phi$ satisfies the premise of R1 or R2}{
-  \Switch{depending on premises of R1 or R2}{
-  	\uCase{$\psi = \psi_1 \land \cdots \land \psi_2 \land \exists{x} \: \xi$ where $\rr(\psi)$ is the set of free variables in $\psi$ but $rr(\xi)$ is not the set of free variables in $\xi$}{Replace $\psi$ by $\srnf(\psi)$\\$\phi := $ result of replacing $\psi$ by $\psi'$ in $\phi$} %TODO
-  	\uCase{R2 applicable}{Push-into-quantifier} %TODO
-  }}
-  \caption{$\ranf(\phi)$}
-\end{algorithm}
-\end{proof}
-
-
-This algorithm can be used to transform a SRNF formula into a RANF formula.
-
-\begin{proof}[Proof]
-	
-	If formula $\phi$ in SRNF is not in RANF, then one of the rewrite rules $(R1, R2)$ can be applied. Algorithm terminates: each successfully completed call to algorithm reduces the number of non-self-contained subformulas, and if a call to algorithm on $\psi$ invokes other calls to algorithm, the input to these recursive calls has fewer non-selfcontained subformulas than does $\psi$.
-\end{proof}
-
-Every RANF formula can be transformed into equivalent relational algebra query.
-
-For given RANF formula $\phi$ with free variables $x_1,...,x_n$, we shall construct a named algebra expression $E_\phi$ over attributes $x_1,...,x_n$ such that for each input instance $I$, $E_\phi(I) = \{x_1,...,x_n |~\phi\}(I)$. (The special case of queries $\{e_1,...,e_n | \phi\}$, where some of the $e_i$ are constants, is handled by performing a join with the constants at the end of the construction.)
-
-\begin{algorithm}
-	\KwIn{A formula $\phi$ in RANF.}
-	\KwOut{An algebra query $E_\phi$ equivalent to $\phi$.}
-	{
-		\uCase{$\phi=R(\vec{e})$}{$\delta_f(\pi_k(\sigma_F(R)))$} 
-		\uCase{$\phi=\psi \land \xi$}{$E_\phi \bowtie E_\xi $}
-		\uCase{$\phi=\psi_1 \lor \psi_2$}{$E_\phi \cup E_\xi $}
-		\uCase{$\phi=\exists x_1, ..., x_n \psi(x_1,...x_n,y_1,..,y_k)$}{$\pi_{y_1,...,y_k}(E_\psi) $} 
+\KwIn{A formula $\phi$ in simple positive SRNF.}
+\KwOut{A formula $\phi'$ in simple positive RANF, equivalent to $\phi$.}
+\While{some subformula $\psi$ (with its conjuncts possibly reordered) of $\phi$ satisfies one of the following cases}{
+\Switch{depending on the structure of $\psi$}{
+	\uCase{$\psi_1 \land \xi$ where $\xi = \xi_1 \lor \xi_2$ and $\psi$ is safe and $\xi$ is not safe}{Nondet.\ choose between $\xi' := (\xi_1 \land \psi_1) \lor (\xi_2 \land \psi_1)$ and $\xi' := \xi$ s.t.\ $\xi'$ is safe.\\
+	\uIf{$\xi' = \xi$}{
+		$\psi' := \srnf(\psi_1 \land \xi')$\\
 	}
-	\caption{}
+	\Else{
+		$\psi' := \srnf(\xi')$\\
+	}
+	$\phi := $ result of replacing $\psi$ by $\psi'$ in $\phi$
+	}
+	\Case{$\psi_1 \land \exists{x} \: \xi$ where $\rr(\psi)$ is safe but $\xi$ is not safe}{Nondet.\ choose between $\xi' := \psi_1 \land \xi$ and $\xi' := \xi$ s.t.\ $\xi'$ is safe.\\ \uIf{$\xi' = \xi$}{$\psi' := \srnf(\psi_1 \land \exists{\vec{x}} \: \xi')$} \Else{$\psi' := \srnf(\exists{\vec{x}} \: \xi')$}$\phi := $ result of replacing $\psi$ by $\psi'$ in $\phi$}
+}}
+\caption{$\ranf(\phi)$}
 \end{algorithm}
 
-Show that $\phi$ and $E\phi$ are equivalent.
+To see correctness of $\ranf$: If $\phi$ is not in simple positive RANF, then one of the rewrite rules can be applied. Termination follows from the fact that each iteration of the loop in the algorithm reduces the number of non-self-contained subformulae, and formulae that appear as arguments in calls to other algorithms, have fewer non-self-contained subformulae than $\psi$.
+
+For the second part of this sketch, we want to elaborate how every simple positive RANF formula can be transformed into an equivalent relational algebra query. Again we provide an algorithm, which is very similar to the one provided in \cite[Algorithm 5.4.8, p.\ 89]{alice}.
+
+For a given simple positive RANF formula $\phi(x_1, \ldots, x_n)$, we shall construct a named algebra expression $E_\phi$ over attributes $x_1, \ldots, x_n$ such that for any database instance $\mathbf{I}$ we have $E_\phi(I) = \{x_1, \ldots, x_n \mid \phi\}(\mathbf{I})$. (The special case of queries $\{e_1, \dots, e_n \mid \phi\}$, where some of the $e_i$ are constants, is handled by performing a join with the constants at the end of the construction.)
+
+\begin{algorithm}
+\KwIn{A formula $\phi$ in simple positive RANF.}
+\KwOut{An algebra query equivalent to $\phi$.}
+\Switch{depending on the structure of $\phi$}{
+\uCase{$R(\vec{e})$}{\Return{$\delta_f(\pi_k(\sigma_F(R)))$} }
+\uCase{$\psi_1 \land \psi_2$}{\Return{$E_{\psi_1} \bowtie E_{\psi_2} $}}
+\uCase{$\psi_1 \lor \psi_2$}{\Return{$E_{\psi_1} \cup E_{\psi_2}$}}
+\Case{$\exists x_1, \dots, x_n \psi(x_1, \dots, x_n, y_1, \dots, y_k)$}{\Return{$\pi_{y_1, \dots, y_k}(E_\psi)$}}
+}
+\caption{$E_\phi$}
+\end{algorithm}
+
+It remains to show that $\phi$ and $E_\phi$ are equivalent to complete this sketch. This proves domain independence since all relational algebra queries are domain independent.
+\end{proof}
 
 \section{Unions of Conjunctive Queries}
 
@@ -141,13 +141,9 @@ However, this yields a contradiction since $\{p(c_{x_1})\} \subseteq \alpha_1(L'
 
 \section{Classes of Conjunctive Queries}
 
-$\cq{} \subseteq \cq{=}$ since \cq{} is the more specific subset of queries inside \cq{=} that do not have equality atoms in the body. The inclusion is obvious.
+First, we consider inclusions between \cq{}, \cq{rep}, \cq{const} and \cq{rep,const}. $\cq{} \subseteq \cq{rep} \subseteq \cq{rep,const}$ since \cq{} is the more specific subset of queries inside \cq{rep} that have no repetitions in the head, and \cq{rep} is the more specific subset of queries inside \cq{rep,const} that have no constants in the head. $\cq{} \subseteq \cq{const} \subseteq \cq{rep,const}$ since \cq{} is the more specific subset of queries inside \cq{const} that have no constants in the head, and \cq{const} is the more specific subset of queries inside \cq{rep,const} that have no repetitions in the head. $\cq{} \subseteq \cq{=}$ since \cq{} is the more specific subset of queries inside \cq{=} that do not have equality atoms in the body. These are the easy inclusions.
 
-Next, we consider inclusions between \cq{}, \cq{rep}, \cq{const} and \cq{rep,const}.
-$\cq{} subseteq \cq{rep} \subseteq \cq{rep,const}$ since \cq{} is the more specific subset of queries inside \cq{rep} that have no repetitions in the head, and \cq{rep} is the more specific subset of queries inside \cq{rep,const} that have no constants in the head. These inclusions are obvious.
-$\cq{} \subseteq \cq{const} \subseteq \cq{rep,const}$ since \cq{} is the more specific subset of queries inside \cq{const} that have no constants in the head, and \cq{const} is the more specific subset of queries inside \cq{rep,const} that have no repetitions in the head. These inclusions are obvious.
-
-To show $\cq{=} \subseteq \cq{rep,const}$ let $Q(\bar{x}) :- L, M$ where $Q(x) \in \cq{=}$ and $n$ be the number of (distinct) inequality atoms in $Q$. We use $M = \{ x_i = y_i \mid 1 \leq i \leq n\}$ to denote the set of equality atoms in $Q$. Without loss of generality we assume that for all equality atoms in $M$ the following holds: (a.) If one of the two terms occurring in the equality atom is a constant, then it is to the right of the equality symbol. (b.) If $x = y$ is in $M$ then $y = x$ is not in $M$ (some ordering on variables is respected). We transform $Q(x)$ into an equivalent query $Q'(x') :- L'$ where $Q'(x) \in \cq{rep,const}$ as follows: We take the set of relational atoms $L$ from $Q$ and translate it to a set of relational atoms $L'$ for $Q'$ by considering $M$. For every equality $x_i = y_i$ in $M$, the relational atoms in $L$ are rewritten by replacing $x_i$ with $y_i$.
+To show $\cq{=} \subseteq \cq{rep,const}$ let $\query{Q}{\bar{x}}{L, M}$ we specify the algorithm $\mathsf{Implode}$.
 
 \begin{algorithm}
 \KwIn{A query $\query{Q}{\vec{x}}{L, M} \in \cq{=}$ where $L$ are relational atoms and $M$ are equality atoms.}
@@ -160,6 +156,8 @@ $\vec{y} := \vec{x}$\\
 \Return{$\query{Q'}{\vec{y}}{L'}$}
 \caption{$\mathsf{Implode}(Q)$}
 \end{algorithm}
+
+Next, we would like to analyze $\cq{=} \stackrel{?}{\supseteq} \cq{rep,const}$ by a similar algorithm $\mathsf{Explode}$.
 
 \begin{algorithm}
 \KwIn{A query $\query{Q}{\vec{x}}{L} \in \cq{rel,const}$ where $L$ are relational atoms.}
@@ -174,40 +172,27 @@ Let $\vec{y}$ be empty.\\
 \caption{$\mathsf{Explode}(Q)$}
 \end{algorithm}
 
-In a similar way, occurences of $x_i$ in the head of $Q$, are replaced by $y_i$ to yield the head of $Q'$. For example:
+However, this is problematic since the translation of $\query{Q}{c}{\emptyset}$ yields $\query{Q}{x}{x = c}$ which is not a simple conjunctive query because the variable $x$ occurs in the head but not in a relational atom. We therefore conjecture that $\cq{=} \not \supseteq \cq{rep,const}$. However, we think that the restriction that variables in the head of a simple conjunctive query must occur in a relational atom is in the spirit of obtaining safe queries. Since in our counterexample the equality atom $x = c$ has a safe range of cardinality 1, we are questioning the definition of simple conjunctive queries. We argue that it might be interesting to relax the requirement and also allow $x = c$ in order to obtain safe queries again. Then we would have $\cq{=} = \cq{rep,const}$ which we deem more intuitive.
 
+To illustrate our translation algorithms, two equivalent queries in \cq{=} and \cq{rep,const} respectively:
 \begin{align}
-Q(x,y,z) :- R(x,y), Q(y,z), x = y, z = c \\
-Q'(x,x,c) :- R(x,x), Q(x,c)
+\query{Q}{x,y,z}{R(x,y),Q(y,z), x = y, z = c} \\
+\query{Q'}{x,x,c}{R(x,x),Q(x,c)}
 \end{align}
-
-Applying this process in reverse (eliminating repetition/constants in the head by introducing a new variable and an equality atom) shows how to translate a query in \cq{rep,const} to a query in \cq{=}, therefore $\cq{=} \supseteq \cq{rep,const}$.
 
 Together with $\cq{rep} \subseteq \cq{rep,const}$ and $\cq{const} \subseteq \cq{rep,const}$ we have $\cq{=} \supset \cq{rep}$ and $\cq{=} \supset \cq{const}$.
 
-3 Repetition does not really increase expressivity (duplicate query):
-To remove repeated variables, introduce new variables and alias them using =.
-$\cq{}    \subseteq \cq{rep}$
-$\cq{rep} \subseteq \cq{}$
+$\cq{=} \not \subseteq \cq{rep}$ by counterexample: For the query $\query{Q}{x}{x = c}$ there is no equivalent query in \cq{rep}.
 
-$\cq{const} \not \supseteq \cq{rep,const}$
+$\cq{=} \not \subseteq \cq{const}$ by counterexample: For the query $\query{Q}{x,y}{x = y}$ there is no equivalent query in \cq{const}.
 
-$\cq{=} \not \subseteq \cq{rep}$ by counterexample: For the query $Q(x) :- x = c$ there is no equivalent query in \cq{rep}.
+$\cq{} \not \supseteq \cq{const}$ by counterexample: For the query $\query{Q}{c}{R(y)}$ there is no equivalent query in \cq{}. 
 
-$\cq{=} \not \subseteq \cq{const}$ by counterexample: For the query $Q(x,y) :- x = y$ there is no equivalent query in \cq{const}.
+$\cq{} \not \supseteq \cq{rep}$ by counterexample: For the query $\query{Q}{x,x}{R(x)}$ there is no equivalent query in \cq{}.
 
-$\cq{} \not \supseteq \cq{const}$ by counterexample: For the query $Q(c) :- R(y)$ there is no equivalent query in \cq{}. 
+$\cq{rep} \not \supseteq \cq{rep,const}$ by counterexample: For the query $\query{Q}{x,x,c}{R(x)}$ there is no equivalent query in \cq{}.
 
-$\cq{} \not \supseteq \cq{rep}$ by counterexample: For the query $Q(x,x) :- R(x)$ there is no equivalent query in \cq{}.
-
-$\cq{rep} \not \supseteq \cq{rep,const}$ by counterexample: For the query $Q(x,x,c) :- R(x)$ there is no equivalent query in \cq{}.
-
-$\cq{const} \not \supseteq \cq{rep,const}$ by counterexample: For the query $Q(x,x,c) :- R(x)$ there is no equivalent query in \cq{}.
-
-Remaining:
-$\cq{} \not \supseteq \cq{=}$
-
-We use the result $\cq{} = \cq{=}$.
+$\cq{const} \not \supseteq \cq{rep,const}$ by counterexample: For the query $\query{Q}{x,x,c}{R(x)}$ there is no equivalent query in \cq{}.
 
 \begin{center}
 \begin{tabular}{|l|cccc|}
