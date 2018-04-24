@@ -111,7 +111,15 @@ For a given simple positive RANF formula $\phi(x_1, \ldots, x_n)$, we shall cons
 \caption{$E_\phi$}
 \end{algorithm}
 
-It remains to show that $\phi$ and $E_\phi$ are equivalent to complete this sketch. This proves domain independence since all relational algebra queries are domain independent.
+Let $q = \{x_1,...,x_n |~ \phi\}$ be safe range query. Without loss of generality, by the previous proof, we can assume that $\phi$ is in modified RANF. We need to show, that $q$ and $E_\phi$ are equivalent. 
+
+For each instance $I$ and each $d$ satisfying $adom(q,I) \subseteq d \subseteq dom$ 
+$$
+q_d(I) = E_\phi(I)
+$$
+
+This proves domain independence since all relational algebra queries are domain independent.
+
 \end{proof}
 
 \section{Unions of Conjunctive Queries}
