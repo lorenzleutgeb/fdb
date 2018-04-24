@@ -6,6 +6,7 @@
 \usepackage[utf8]{inputenc}			% кодировка исходного текста
 \usepackage[english]{babel}     	% локализация и переносы
 \usepackage{csquotes}
+\usepackage{multicol}
 \usepackage{tikz}
 \usetikzlibrary{positioning}
 
@@ -111,15 +112,12 @@ For a given simple positive RANF formula $\phi(x_1, \ldots, x_n)$, we shall cons
 \caption{$E_\phi$}
 \end{algorithm}
 
-Let $q = \{x_1,...,x_n |~ \phi\}$ be safe range query. Without loss of generality, by the previous proof, we can assume that $\phi$ is in modified RANF. We need to show, that $q$ and $E_\phi$ are equivalent. 
+Let $q = \{x_1, \dots, x_n \mid \phi\}$ be safe range query. Without loss of generality, by the previous proof, we can assume that $\phi$ is in RANF. We need to show, that $q$ and $E_\phi$ are equivalent. 
 
-For each instance $I$ and each $d$ satisfying $adom(q,I) \subseteq d \subseteq dom$ 
-$$
-q_d(I) = E_\phi(I)
-$$
+For each instance $\textbf{I}$ and each $\textbf{d}$ satisfying $adom(q,\textbf{I}) \subseteq \textbf{d} \subseteq \textbf{dom}$  we have
+$$q_{\textbf{d}}(\textbf{I}) = E_\phi(\textbf{I})$$
 
-This proves domain independence since all relational algebra queries are domain independent.
-
+Domain independence of $\phi$ can be shown by induction.
 \end{proof}
 
 \section{Unions of Conjunctive Queries}
@@ -188,19 +186,25 @@ To illustrate our translation algorithms, two equivalent queries in \cq{=} and \
 \query{Q'}{x,x,c}{R(x,x),Q(x,c)}
 \end{align}
 
-Together with $\cq{rep} \subseteq \cq{rep,const}$ and $\cq{const} \subseteq \cq{rep,const}$ we have $\cq{=} \supset \cq{rep}$ and $\cq{=} \supset \cq{const}$.
+Further we obtain the following non-inclusions by means of counterexamples. As the property that all queries in a certain class fulfill we take the syntactic restrictions on head (multiple occurrences of a variable in the head, occurrence of constants in the head, occurrence of equality atoms in the body) from their definitions. The example should illustrate which class of queries cannot be equivalently expressed in the respective other class.
 
-$\cq{=} \not \subseteq \cq{rep}$ by counterexample: For the query $\query{Q}{x}{x = c}$ there is no equivalent query in \cq{rep}.
+\begin{center}
+\begin{tabular}{rcll}
+\multicolumn{3}{c}{Non-Inclusion} & Example \\
+$\cq{}$ & $\not \supseteq$ & $\cq{rep}$ & $\query{Q}{x,x}{R(x)}$ \\
+$\cq{}$ & $\not \supseteq$ & $\cq{const}$ & $\query{Q}{c}{\emptyset}$ \\
+$\cq{=}$ & $\not \subseteq$ & $\cq{rep}$ & $\query{Q}{x}{x = c}$ \\
+$\cq{=}$ & $\not \subseteq$ & $\cq{const}$ & $\query{Q}{x,y}{x = y}$ \\
+$\cq{rep}$ & $\not \subseteq$ & $\cq{const}$ & $\query{Q}{c}{\emptyset}$ \\
+$\cq{rep}$ & $\not \supseteq$ & $\cq{rep,const}$ & $\query{Q}{c}{\emptyset}$ \\
+$\cq{const}$ & $\not \supseteq$ & $\cq{rep}$ & $\query{Q}{x,x}{R(x)}$ \\
+$\cq{const}$ & $\not \supseteq$ & $\cq{rep,const}$ & $\query{Q}{x,x,c}{R(x)}$
+\end{tabular}
+\end{center}
 
-$\cq{=} \not \subseteq \cq{const}$ by counterexample: For the query $\query{Q}{x,y}{x = y}$ there is no equivalent query in \cq{const}.
+We summarize our findings in the following table and as a lattice over the partial order $\subseteq$.
 
-$\cq{} \not \supseteq \cq{const}$ by counterexample: For the query $\query{Q}{c}{R(y)}$ there is no equivalent query in \cq{}. 
-
-$\cq{} \not \supseteq \cq{rep}$ by counterexample: For the query $\query{Q}{x,x}{R(x)}$ there is no equivalent query in \cq{}.
-
-$\cq{rep} \not \supseteq \cq{rep,const}$ by counterexample: For the query $\query{Q}{x,x,c}{R(x)}$ there is no equivalent query in \cq{}.
-
-$\cq{const} \not \supseteq \cq{rep,const}$ by counterexample: For the query $\query{Q}{x,x,c}{R(x)}$ there is no equivalent query in \cq{}.
+\begin{multicols}{2}
 
 \begin{center}
 \begin{tabular}{|l|cccc|}
@@ -218,15 +222,17 @@ $\cq{const} \not \supseteq \cq{rep,const}$ by counterexample: For the query $\qu
 \begin{center}
 \begin{tikzpicture}
 		\node (t)                          {\cq{=}, \cq{rep,const}};
-		\node (l) [below left =1.5cm of t] {\cq{rep}};
-		\node (r) [below right=1.5cm of t] {\cq{const}};
-		\node (b) [below      =  3cm of t] {\cq{}};
+		\node (l) [below left =0.75cm of t] {\cq{rep}};
+		\node (r) [below right=0.75cm of t] {\cq{const}};
+		\node (b) [below      =1.50cm of t] {\cq{}};
 		\draw (b) -> (l);
 		\draw (b) -> (r);
 		\draw (l) -> (t);
 		\draw (r) -> (t);
 \end{tikzpicture}
 \end{center}
+
+\end{multicols}
 
 \bibliography{2}
 
