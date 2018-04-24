@@ -121,7 +121,34 @@ Next, we consider inclusions between \cq{}, \cq{rep}, \cq{const} and \cq{rep,con
 $\cq{} subseteq \cq{rep} \subseteq \cq{rep,const}$ since \cq{} is the more specific subset of queries inside \cq{rep} that have no repetitions in the head, and \cq{rep} is the more specific subset of queries inside \cq{rep,const} that have no constants in the head. These inclusions are obvious.
 $\cq{} \subseteq \cq{const} \subseteq \cq{rep,const}$ since \cq{} is the more specific subset of queries inside \cq{const} that have no constants in the head, and \cq{const} is the more specific subset of queries inside \cq{rep,const} that have no repetitions in the head. These inclusions are obvious.
 
-To show $\cq{=} \subseteq \cq{rep,const}$ let $Q(\bar{x}) :- L, M$ where $Q(x) \in \cq{=}$ and $n$ be the number of (distinct) inequality atoms in $Q$. We use $M = \{ x_i = y_i \mid 1 \leq i \leq n\}$ to denote the set of equality atoms in $Q$. Without loss of generality we assume that for all equality atoms in $M$ the following holds: (a.) If one of the two terms occurring in the equality atom is a constant, then it is to the right of the equality symbol. (b.) If $x = y$ is in $M$ then $y = x$ is not in $M$ (some ordering on variables is respected). We transform $Q(x)$ into an equivalent query $Q'(x') :- L'$ where $Q'(x) \in \cq{rep,const}$ as follows: We take the set of relational atoms $L$ from $Q$ and translate it to a set of relational atoms $L'$ for $Q'$ by considering $M$. For every equality $x_i = y_i$ in $M$, the relational atoms in $L$ are rewritten by replacing $x_i$ with $y_i$. In a similar way, occurences of $x_i$ in the head of $Q$, are replaced by $y_i$ to yield the head of $Q'$. For example:
+To show $\cq{=} \subseteq \cq{rep,const}$ let $Q(\bar{x}) :- L, M$ where $Q(x) \in \cq{=}$ and $n$ be the number of (distinct) inequality atoms in $Q$. We use $M = \{ x_i = y_i \mid 1 \leq i \leq n\}$ to denote the set of equality atoms in $Q$. Without loss of generality we assume that for all equality atoms in $M$ the following holds: (a.) If one of the two terms occurring in the equality atom is a constant, then it is to the right of the equality symbol. (b.) If $x = y$ is in $M$ then $y = x$ is not in $M$ (some ordering on variables is respected). We transform $Q(x)$ into an equivalent query $Q'(x') :- L'$ where $Q'(x) \in \cq{rep,const}$ as follows: We take the set of relational atoms $L$ from $Q$ and translate it to a set of relational atoms $L'$ for $Q'$ by considering $M$. For every equality $x_i = y_i$ in $M$, the relational atoms in $L$ are rewritten by replacing $x_i$ with $y_i$.
+
+\begin{algorithm}
+\KwIn{A query $\query{Q}{\vec{x}}{L, M} \in \cq{=}$ where $L$ are relational atoms and $M$ are equality atoms.}
+\KwOut{A query in $\cq{rel,const}$ equivalent to $Q$.}
+$L' := L$\\
+$\vec{y} := \vec{x}$\\
+\ForEach{equality atom of the form $x = y$ in $M$}{
+		Replace all occurrences of $x$ in $L'$ and $\vec{y}$ by $y$.
+}
+\Return{$\query{Q'}{\vec{y}}{L'}$}
+\caption{$\mathsf{Implode}(Q)$}
+\end{algorithm}
+
+\begin{algorithm}
+\KwIn{A query $\query{Q}{\vec{x}}{L} \in \cq{rel,const}$ where $L$ are relational atoms.}
+\KwOut{A query in $\cq{=}$ equivalent to $Q$.}
+$M := \emptyset$\\
+Let $\vec{y}$ be empty.\\
+\ForEach{term $x$ in $\vec{x}$}{
+		Let $y$ be a fresh variable name.\\
+		Add $y$ to $\vec{y}$ and $y = x$ to $M$.
+}
+\Return{$\query{Q'}{\vec{y}}{L, M}$}
+\caption{$\mathsf{Explode}(Q)$}
+\end{algorithm}
+
+In a similar way, occurences of $x_i$ in the head of $Q$, are replaced by $y_i$ to yield the head of $Q'$. For example:
 
 \begin{align}
 Q(x,y,z) :- R(x,y), Q(y,z), x = y, z = c \\
