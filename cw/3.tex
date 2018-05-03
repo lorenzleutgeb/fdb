@@ -1,0 +1,87 @@
+\documentclass[a4paper,12pt]{article} 
+
+\usepackage[a4paper, top=3cm, bottom=3cm, left=2cm, right=2cm]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{cmap}					% поиск в PDF
+\usepackage[utf8]{inputenc}			% кодировка исходного текста
+\usepackage[english]{babel}     	% локализация и переносы
+\usepackage{csquotes}
+\usepackage{multicol}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+\bibliographystyle{abbrv}
+
+\usepackage[ruled,linesnumbered]{algorithm2e}
+
+\newtheorem{claim}{Claim}
+
+\newcommand{\cq}[1]{\ensuremath{\mathsf{CQ}_{#1}}}
+\newcommand{\query}[3]{\ensuremath{{#1}({#2})\:{:}{-}\:{#3}}}
+\newcommand{\rr}{\mathsf{RR}}
+\newcommand{\ranf}{\mathsf{RANF}}
+\newcommand{\srnf}{\mathsf{SRNF}}
+\renewcommand{\phi}{\varphi}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Foundations of Databases}\\[3mm]
+
+{\Large Coursework 3}\\[5mm]
+
+Lorenz Leutgeb\\\texttt{lorenz.leutgeb@stud-inf.unibz.it}\\[2mm]
+Anastassiya Pustozerova\\\texttt{anastassiya.pustozerova@stud-inf.unibz.it}
+\end{center}
+
+\section{Evaluation of Special Types of Conjunctive Graph Queries}
+
+\section{Evaluation of Conjunctive Queries with Unary Relation Symbols}
+
+We address two classes of queries separately.
+
+\paragraph{Relational Queries}{We consider relational queries of the form $\query{Q}{x_1, \dots, x_n}{L}$ where all elements of $L$ are relational atoms of arity one. Algorithm \ref{alg:rue} solves \textbf{query evaluation for these queries in polynomial time}. This stems from the fundamental insight that computing the union of two sets $R_1$ and $R_2$ can be achieved in time $\mathcal{O}(|R_1| \cdot |R_2|)$. The idea behind the algorithm is to start with the maximal set of answers possible $adom(\mathbf{I})^n$ (without an explicitl construction) and then mimimize this set using the relational atoms in the body of the query. For every variable $x_i$ ($1 \leq i \leq n$) in the head, an intermediate relation $R_{x_i}$ is introduced and initialized to equal $adom(\mathbf{I})$. Then for every relational atom in which one of the free variables of the query occurs $R(x_i)$ ($1 \leq i \leq n$) the corresponding intermediate relation $R_{x_i}$ is filtered by $R$ accordingly by intersecting the two sets.
+
+\begin{algorithm}
+\KwIn{A relational conjunctive query with unary relational symbols $\query{Q}{x_1, \dots, x_n}{L}$ where $L$ are relational atoms, a database instance $\mathbf{I}$, and an $n$-tuple $\bar{c} = (c_1, \dots, c_n)$.}
+\KwOut{\enquote{yes} if $\bar{c} \in Q(\mathbf{I})$, otherwise \enquote{no}.}
+\ForEach{$i \in \{1, \ldots, n\}$}{
+	$R_{x_i} := adom(\mathbf{I})$
+}
+\ForEach{$R(x_i) \in L$ with $i \in \{1, \dots, n\}$}{
+	$R_x := R_x \cap R(\mathbf{I})$
+}
+\ForEach{$i \in \{1, \ldots, n\}$}{
+	\If{$c_i \not \in R_{x_i}$}{\Return{\enquote{no}}}
+}
+\Return{\enquote{yes}}
+\caption{$\mathsf{RelUnaryEval}(Q,\mathbf{I})$}
+\label{alg:rue}
+\end{algorithm}
+
+The loop in lines 1-3 takes time in $\mathcal{O}(n \cdot |adom(\mathbf{I})|)$, since it copies the active domain of the database instance $n$ times. The loop in lines 4-6 takes time in $\mathcal{O}(|L| \cdot |adom(\mathbf{I})|^2)$: For every relational atom in the body of the query it computes an intersection, where the upper bound of the size of both intersected sets is the size of the active domain of the database instance. Finally, the containment checks in the loop in lines 7-11 take time in $\mathcal{O}(n \cdot |adom(\mathbf{I})|)$ in the worst case. We observe that the loop in lines 4-6 dominates the time-behavior of the algorithm and relax $adom(\mathbf{I})$ to $|\mathbf{I}|$ and $|L|$ as well as $n$ to $|Q|$, which yields an overall bound of $\mathcal{O}(|Q| \cdot |\mathbf{I}|^2)$. If we assume $Q$ (respectively $\mathbf{•}thbf{I}$) of constant size, we arrive at  $\mathcal{O}(|\mathbf{I}|^2)$ (respectively $\mathcal{O}(|Q|)$).
+}
+
+\paragraph{General Conjunctive Queries}{We consider the larger class of general conjunctive queries of the form $\query{Q}{x_1, \dots, x_n}{L,M}$ where all elements of $L$ are relational atoms of arity one and elements of $M$ are atoms over the built-in predicates $<$, $\leq$ and $\not =$.
+
+We show that query evaluation for this class of queries is \textbf{NP-hard by reduction from} the well-known graph coloring problem.
+
+\begin{center}
+\textbf{Graph Coloring Problem}\\[1mm]
+\begin{tabular}{rp{14cm}}
+Given: & A directed graph $G = (V, E)$. \\
+Question: & Is it possible to find a labeling $\alpha : V \rightarrow \{r, g, b\}$ with the property that for all $v, u \in V$ with $(v, u) \in E$ we have $\alpha(v) \not = \alpha(u)$.
+\end{tabular}
+\end{center}
+
+Let $\mathbf{I}_{3} = \{ R(c_r), R(c_g), R(c_b) \}$, and $\mathcal{V}$ be an arbitrary infinite set of variable symbols and $\tilde{\cdot} : V \rightarrow \mathcal{V}$ be an injective function that maps a vertex $v \in V$ to an arbitrary variable symbol in $\mathcal{V}$.
+
+Further, let $\query{Q_G}{}{L,M}$ be a (boolean) general conjunctive query where $L = \{ R(\tilde{v}) \mid v \in V \}$ and $M = \{ \tilde{v} \not = \tilde{u} \mid (v, u) \in E\}$.
+
+We show that for a given directed graph $G$, a labeling $\alpha$ (with the property required by the Graph Coloring Problem) exists if-and-only-if $Q_G(\mathbf{I}_3)
+ = \{ () \}$.
+
+To see the if-direction: Let $\alpha$ by \dots
+
+\section{Containment of Relational Conjunctive Queries without Self Joins}
+\end{document}
