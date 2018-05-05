@@ -35,6 +35,21 @@ Anastassiya Pustozerova\\\texttt{anastassiya.pustozerova@stud-inf.unibz.it}
 \end{center}
 
 \section{Evaluation of Special Types of Conjunctive Graph Queries}
+\begin{algorithm}
+	\KwIn{A database instance $\mathbf{I}$, and integer $k$.}
+	\KwOut{All the nodes, that lie on a circle of length $k$}
+	\ForEach{$j \in \{1, \ldots, k\}$}{
+		$R := \pi_{edge.1}(\sigma_j(edge))$\\
+		$R_0:=R$\\
+		\ForEach{$i \in \{1, \ldots, k\}$}{
+			$R:=\pi_{edge.2}(\sigma_i(edge \Join_{edge.1=R.1} R ))$
+		}
+		\If{$R=R_0$}{\Return $R$}
+	}
+	\caption{Algorithm for evaluating cycle query}
+	%\label{alg:rue}
+\end{algorithm}
+
 
 \section{Evaluation of Conjunctive Queries with Unary Relation Symbols}
 
