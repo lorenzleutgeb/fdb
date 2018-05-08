@@ -51,24 +51,60 @@ Anastassiya Pustozerova\\\texttt{anastassiya.pustozerova@stud-inf.unibz.it}
 \end{algorithm}
 
 
+\paragraph{Circle Query}{
+\begin{algorithm}
+\KwIn{A positive integer $k$, a database instance $\mathbf{I}$, and a unary tuple $\bar{c} = (c)$.}
+\KwOut{\enquote{yes} iff $\bar{c} \in C_k(\mathbf{I})$, otherwise \enquote{no}.}
+\caption{$\mathsf{EvalCircle}(k, \mathbf{I}, \bar{c})$}
+\end{algorithm}
+}
+
+\paragraph{Star Query}{
+
+\begin{algorithm}
+\KwIn{A positive integer $k$, a database instance $\mathbf{I}$, and a unary tuple $\bar{c} = (c)$.}
+\KwOut{\enquote{yes} iff $\bar{c} \in S_k(\mathbf{I})$, otherwise \enquote{no}.}
+\ForEach{$(v, u) \in edge(\mathbf{I})$}{
+	\If{$v = c$}{\Return{\enquote{yes}}}
+}
+\Return{\enquote{no}}
+\caption{$\mathsf{EvalStar}(k, \mathbf{I}, \bar{c})$}
+\end{algorithm}
+}
+
+\paragraph{Spider-Web Query}{
+% Copy what was on the blackboard.
+}
+
+\paragraph{Clique Query}{The clique problem is known to be NP-complete. We present the following guess-and-check algorithm which has a worst-case time complexity in $\mathcal{O}(|\mathbf{I}|^k \cdot k^2)$.}
+
 \section{Evaluation of Conjunctive Queries with Unary Relation Symbols}
 
 We address two classes of queries separately.
 
-\paragraph{Relational Queries}{We consider relational queries of the form $\query{Q}{x_1, \dots, x_n}{L}$ where all elements of $L$ are relational atoms of arity one. Algorithm \ref{alg:rue} solves \textbf{query evaluation for these queries in polynomial time}. This stems from the fundamental insight that computing the union of two sets $R_1$ and $R_2$ can be achieved in time $\mathcal{O}(|R_1| \cdot |R_2|)$. The idea behind the algorithm is to start with the maximal set of answers possible $adom(\mathbf{I})^n$ (without an explicitl construction) and then mimimize this set using the relational atoms in the body of the query. For every variable $x_i$ ($1 \leq i \leq n$) in the head, an intermediate relation $R_{x_i}$ is introduced and initialized to equal $adom(\mathbf{I})$. Then for every relational atom in which one of the free variables of the query occurs $R(x_i)$ ($1 \leq i \leq n$) the corresponding intermediate relation $R_{x_i}$ is filtered by $R$ accordingly by intersecting the two sets.
+\paragraph{Relational Queries}{We consider relational queries of the form $\query{Q}{x_1, \dots, x_n}{L}$ where all elements of $L$ are relational atoms of arity one. Algorithm \ref{alg:rue} solves \textbf{query evaluation for these queries in polynomial time}. This stems from the fundamental insight that computing the union of two sets $R_1$ and $R_2$ can be achieved in time $\mathcal{O}(|R_1| \cdot |R_2|)$. The idea behind the algorithm is to start with the maximal set of answers possible $adom(\mathbf{I})^n$ (without an explicit construction) and then mimimize this set using the relational atoms in the body of the query. For every variable $x_i$ ($1 \leq i \leq n$) in the head, an intermediate relation $R_{x_i}$ is introduced and initialized to equal $adom(\mathbf{I})$. Then for every relational atom in which one of the free variables of the query occurs $R(x_i)$ ($1 \leq i \leq n$) the corresponding intermediate relation $R_{x_i}$ is filtered by $R$ accordingly by intersecting the two sets.
 
 \begin{algorithm}
-\KwIn{A relational conjunctive query with unary relational symbols $\query{Q}{x_1, \dots, x_n}{L}$ where $L$ are relational atoms, a database instance $\mathbf{I}$, and an $n$-tuple $\bar{c} = (c_1, \dots, c_n)$.}
-\KwOut{\enquote{yes} if $\bar{c} \in Q(\mathbf{I})$, otherwise \enquote{no}.}
+\KwIn{A boolean relational conjunctive query with unary relational symbols $\query{Q}{}{L}$ where $L$ are relational atoms, a database instance $\mathbf{I}$.}
+\KwOut{\enquote{yes} iff $\{()\} = Q(\mathbf{I})$, otherwise \enquote{no}.}
+Let $\bar{x} = (x_1, \ldots x_n)$ contain all variables of $Q$ in arbitrary order.\\
 \ForEach{$i \in \{1, \ldots, n\}$}{
 	$R_{x_i} := adom(\mathbf{I})$
 }
-\ForEach{$R(x_i) \in L$ with $i \in \{1, \dots, n\}$}{
-	$R_x := R_x \cap R(\mathbf{I})$
+\ForEach{$R(x_i) \in L$ with $i \in \{1, \ldots, n\}$}{
+	%\If{$x = x_i$ with $i \in \{1, \dots, n\}$}{
+	$R_{x_i} := R_{x_i} \cap R(\mathbf{I})$\\
+	\If{$R_{x_i} = \emptyset$}{\Return{\enquote{no}}}
+	%}
+	%\Else{
+		%\Switch{
+			% Intersect exitentially quantified variable domains until \emptyset (in this case return no)
+		%	}
+	%}
 }
-\ForEach{$i \in \{1, \ldots, n\}$}{
-	\If{$c_i \not \in R_{x_i}$}{\Return{\enquote{no}}}
-}
+%\ForEach{$i \in \{1, \ldots, n\}$}{
+%	\If{$R_{x_i} = \emptyset$}{\Return{\enquote{no}}}
+%}
 \Return{\enquote{yes}}
 \caption{$\mathsf{RelUnaryEval}(Q,\mathbf{I})$}
 \label{alg:rue}
@@ -99,4 +135,71 @@ We show that for a given directed graph $G$, a labeling $\alpha$ (with the prope
 To see the if-direction: Let $\alpha$ by \dots
 
 \section{Containment of Relational Conjunctive Queries without Self Joins}
+
+Given two relational conjunctive queries without self joins $Q$ and $Q'$ and the question $Q \stackrel{\sqsubseteq} Q'$, our idea is to implement an algorithm that checks whether it is possible to find a query homomorphism $h : \mathcal{T}(Q') \rightarrow \mathcal{T}(Q)$ . By the Chandra-Merlin theorem $h$ exists if-and-only-if $Q \sqsubseteq Q'$ (note that we consider queries without built-ins).
+
+In the lecture we saw two different definitions for query homomorphisms. The more strict one is defined in the slides (Part 4: Conjunctive Queries, slide 26). In the lecture we discovered a more general definition, where they key difference is how distinguished variables are handled.
+
+Algorithm \ref{alg:homstrict} decides the existance of a homomorphism according to the stricter definition (see lines 16-21), and below we describe a procedure that addresses the more general setting:
+
+\begin{algorithm}
+\KwIn{Two relational queries without self join $\query{Q}{\bar{x}}{L}$ and $\query{Q'}{\bar{x'}}{L'}$.}
+\KwOut{\enquote{yes} iff $Q \sqsubseteq Q'$, otherwise \enquote{no}.}
+\ForEach{relational atom $R'(t'_1, \ldots, t'_n) \in L'$}{
+$f := \bot$\\
+\ForEach{relational atom $R(t_1, \ldots t_m) \in L$}{
+\If{$R \not = R'$ or $n \not = m$}{\textbf{continue}}
+$f := \top$\\
+\ForEach{$i \in \{1, \ldots, n\}$}{
+\Switch{on the type of $t'_i$}{
+	\Case{constant}{
+		\If{$t_i$ is a constant and $t_i = t'_i$}{\textbf{continue}}
+		\Return{\enquote{no}}, since some constant would not be mapped to itself, violating $h(c) = c$.
+	}
+	\Case{distinguished variable in $Q'$}{
+		\If{$t_i$ is a distinguished variable in $Q$ and $t_i = t'_i$}{\textbf{continue}}
+		\Return{\enquote{no}}, since some distinguished variable would not be mapped to itself, violating $h(x) = x$.
+	}
+	\Case{non-distinguished variable}{
+		// $t'_i$ may be mapped to other variables or constants.\\
+		\textbf{continue}
+	}
+}
+%\Return{\enquote{no}}, since there cannot be a homomorphism from $Q'$ to $Q$.
+
+%\If{$t'_i$ is a variable that is not a distinguished variable in $Q'$}{\textbf{continue}, since the non-distinguished variable can mapped to other variables or constants.}
+%\If{$t'_i$ is a constant and $t_i$ is a constant and $t_i \not = t'_i$}{\Return{\enquote{no}}, since for any homomorphism $h(c) = c$.}
+%\If{$t'_i$ is a constant and $t_i$ is not a constant}{\Return{\enquote{no}}, since for any homomorphism $h(c) = c$.}
+%\If{$t'_i$ is a distinguished variable and $t[i]$ is a distinguished variable and $t_i \not = t'_i$}{\Return{\enquote{no}}, since distinguished variables must map to themselves.}}
+}
+\textbf{break}\\
+}
+\If{$f = \bot$}{\Return{\enquote{no}}, since there is no relational atom over the relation $R$ in $L$, violating $h(L') \subseteq L$.}
+}
+\Return{\enquote{yes}}
+\caption{$\mathsf{NoSelfJoinContained}(Q, Q')$}
+\label{alg:homstrict}
+\end{algorithm}
+
+For the more general definition, we want to reduce the decision problem of the existence of a homomorphism $h : \mathcal{T}(Q') \rightarrow \mathcal{T}(Q)$ to term matching.
+
+\begin{algorithm}
+\KwIn{Two relational queries without self join $\query{Q}{\bar{x}}{L}$ and $\query{Q'}{\bar{x'}}{L'}$.}
+\KwOut{\enquote{yes} iff $Q \sqsubseteq Q'$, otherwise \enquote{no}.}
+$\mathcal{U} := \emptyset$\\
+
+\ForEach{relational atom $R(t'_1, \ldots, t'_n) \in L'$}{
+	\If{$R(t_1, \ldots, t_n) \not \in L$}{\Return{\enquote{no}}}
+	$\mathcal{U} := \mathcal{U} \cup \{ t'_1 \approx t_1, \ldots, t'_n \approx t_n \}$ where $R(t_1, \ldots, t_n) \in L$\\
+}
+
+\While{$\mathcal{U} \not = \emptyset$}{
+	Select an equation $s \approx t$ from $\mathcal{U}$.\\
+	$\mathcal{U} := \mathcal{U} \setminus \{ s \approx t \}$\\
+}
+\caption{$\mathsf{NoSelfJoinContained}(Q, Q')$}
+\label{alg:homgen}
+\end{algorithm}
+
+% Comment why we require distinguished variables to map to themselves. More general definition of a homomorphism is possible and we saw one in the lecture, but the one on the slides is stricter.
 \end{document}
