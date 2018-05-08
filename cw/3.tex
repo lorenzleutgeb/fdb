@@ -17,6 +17,8 @@
 \newtheorem{claim}{Claim}
 
 \newcommand{\cq}[1]{\ensuremath{\mathsf{CQ}_{#1}}}
+\newcommand{\dbi}{\ensuremath{\mathbf{I}}}
+\newcommand{\bigo}{\ensuremath{\mathcal{O}}}
 \newcommand{\query}[3]{\ensuremath{{#1}({#2})\:{:}{-}\:{#3}}}
 \newcommand{\rr}{\mathsf{RR}}
 \newcommand{\ranf}{\mathsf{RANF}}
@@ -35,65 +37,73 @@ Anastassiya Pustozerova\\\texttt{anastassiya.pustozerova@stud-inf.unibz.it}
 \end{center}
 
 \section{Evaluation of Special Types of Conjunctive Graph Queries}
-\begin{algorithm}
-	\KwIn{A database instance $\mathbf{I}$, and integer $k$.}
-	\KwOut{All the nodes, that lie on a circle of length $k$}
-	\ForEach{$j \in \{1, \ldots, k\}$}{
-		$R := \pi_{edge.1}(\sigma_j(edge))$\\
-		$R_0:=R$\\
-		\ForEach{$i \in \{1, \ldots, k\}$}{
-			$R:=\pi_{edge.2}(\sigma_i(edge \Join_{edge.1=R.1} R ))$
-		}
-		\If{$R=R_0$}{\Return $R$}
-	}
-	\caption{Algorithm for evaluating cycle query}
-	%\label{alg:rue}
-\end{algorithm}
 
+We let $n = |\dbi|$.
 
 \paragraph{Circle Query}{
 \begin{algorithm}
-\KwIn{A positive integer $k$, a database instance $\mathbf{I}$, and a unary tuple $\bar{c} = (c)$.}
-\KwOut{\enquote{yes} iff $\bar{c} \in C_k(\mathbf{I})$, otherwise \enquote{no}.}
-\caption{$\mathsf{EvalCircle}(k, \mathbf{I}, \bar{c})$}
+	\KwIn{A positive non-zero integer $k$, a database instance (implicitly).}
+	\KwOut{All the nodes, that lie on a circle of length at least $k$.}
+	$R := \rho_{start \: \leftarrow\: 1, end\: \leftarrow\: 2}(edge)$\\
+	\ForEach{$i \in \{1, \ldots, k - 1\}$}{
+		$R := \rho_{end \:\leftarrow\:2} (\pi_{start, 2}(R \bowtie_{end = 1} edge))$\\
+	}
+	\Return{$\pi_{R.end}(\sigma_{R.start = R.end}R)$}
+	\caption{$\mathsf{EvalCircle}(k)$}
+	\label{alg:circle}
 \end{algorithm}
+
+Algorithm \ref{alg:circle} computes answers for $C_k$. The join in line 3 joins two relations of at most rows $n$ and results a relation of at most $n$ rows. This requires $\bigo(n \log n)$ steps. Note that the join in line 3 is executed $k - 1$ times, since it is inside a loop. The selection and projection in line 5 can be achieved by a single scan over $R$, thus are in $\bigo(n)$. We arrive at an overall time complexity in $\bigo(k \cdot n \cdot \log n)$ or rather $\bigo(k \cdot |\dbi| \cdot \log |\dbi|)$.
 }
 
 \paragraph{Star Query}{
 
 \begin{algorithm}
-\KwIn{A positive integer $k$, a database instance $\mathbf{I}$, and a unary tuple $\bar{c} = (c)$.}
-\KwOut{\enquote{yes} iff $\bar{c} \in S_k(\mathbf{I})$, otherwise \enquote{no}.}
-\ForEach{$(v, u) \in edge(\mathbf{I})$}{
-	\If{$v = c$}{\Return{\enquote{yes}}}
-}
-\Return{\enquote{no}}
-\caption{$\mathsf{EvalStar}(k, \mathbf{I}, \bar{c})$}
+\KwIn{A positive non-zero integer $k$, a database instance (implicitly).}
+\KwOut{All the nodes, that are in the center of a star of at least $k$ nodes.}
+\Return{$\Pi_{edge.1}$}
+\caption{$\mathsf{EvalStar}(k, \dbi, \bar{c})$}
+\label{alg:star}
 \end{algorithm}
+
+Time complexity of Algorithm \ref{alg:star} is in $\bigo(n) = \bigo(|\dbi|)$, a single scan over all edges suffices.
 }
 
 \paragraph{Spider-Web Query}{
 % Copy what was on the blackboard.
+\begin{algorithm}
+	\KwIn{A positive non-zero integer $k$, a database instance (implicitly).}
+	\KwOut{All the nodes, that lie on a circle of length at least $k$.}
+	$R := \rho_{center \: \leftarrow\: 1, start\: \leftarrow\: 2}(edge) \bowtie \rho_{start\: \leftarrow\: 1, end\: \leftarrow\: 2}(edge)$\\
+	\ForEach{$i \in \{1, \ldots, k - 1\}$}{
+		$R := \rho_{end \:\leftarrow\:2} (\pi_{center, start, 2}(R \bowtie_{end = 1} edge))$\\
+	}
+	\Return{$\pi_{R.center}(\sigma_{R.start = R.end}R)$}
+	\caption{$\mathsf{EvalSpiderWeb}(k)$}
+	\label{alg:web}
+\end{algorithm}
+
+Consider Algorithm \ref{alg:web}: The time complexity of line 1 is in $\bigo(n \cdot \log n)$ and the analysis for lines 2-5 is similar to the $\mathsf{EvalCircle}$. We arrive at a time complexity in $\bigo(k \cdot n \cdot \log n)$ for the algorithm.
 }
 
-\paragraph{Clique Query}{The clique problem is known to be NP-complete. We present the following guess-and-check algorithm which has a worst-case time complexity in $\mathcal{O}(|\mathbf{I}|^k \cdot k^2)$.}
+\paragraph{Clique Query}{The clique problem (for varying $k$) is known to be NP-complete (and a reduction from it is obvious). Time complexity of a guess-and-check algorithm is in $\bigo(n^k \cdot k^2)$ where $n^k$ is an upper bound for the number of possible cliques (subsets of $k$ nodes of the original graph) to guess and checking full connectedness for $k$ takes $k^2$ steps.}
 
 \section{Evaluation of Conjunctive Queries with Unary Relation Symbols}
 
 We address two classes of queries separately.
 
-\paragraph{Relational Queries}{We consider relational queries of the form $\query{Q}{x_1, \dots, x_n}{L}$ where all elements of $L$ are relational atoms of arity one. Algorithm \ref{alg:rue} solves \textbf{query evaluation for these queries in polynomial time}. This stems from the fundamental insight that computing the union of two sets $R_1$ and $R_2$ can be achieved in time $\mathcal{O}(|R_1| \cdot |R_2|)$. The idea behind the algorithm is to start with the maximal set of answers possible $adom(\mathbf{I})^n$ (without an explicit construction) and then mimimize this set using the relational atoms in the body of the query. For every variable $x_i$ ($1 \leq i \leq n$) in the head, an intermediate relation $R_{x_i}$ is introduced and initialized to equal $adom(\mathbf{I})$. Then for every relational atom in which one of the free variables of the query occurs $R(x_i)$ ($1 \leq i \leq n$) the corresponding intermediate relation $R_{x_i}$ is filtered by $R$ accordingly by intersecting the two sets.
+\paragraph{Relational Queries}{We consider relational queries of the form $\query{Q}{x_1, \dots, x_n}{L}$ where all elements of $L$ are relational atoms of arity one. Algorithm \ref{alg:rue} solves \textbf{query evaluation for these queries in polynomial time}. This stems from the fundamental insight that computing the union of two sets $R_1$ and $R_2$ can be achieved in time $\bigo(|R_1| \cdot |R_2|)$. The idea behind the algorithm is to start with the maximal set of answers possible $adom(\dbi)^n$ (without an explicit construction) and then mimimize this set using the relational atoms in the body of the query. For every variable $x_i$ ($1 \leq i \leq n$) in the head, an intermediate relation $R_{x_i}$ is introduced and initialized to equal $adom(\dbi)$. Then for every relational atom in which one of the free variables of the query occurs $R(x_i)$ ($1 \leq i \leq n$) the corresponding intermediate relation $R_{x_i}$ is filtered by $R$ accordingly by intersecting the two sets.
 
 \begin{algorithm}
-\KwIn{A boolean relational conjunctive query with unary relational symbols $\query{Q}{}{L}$ where $L$ are relational atoms, a database instance $\mathbf{I}$.}
-\KwOut{\enquote{yes} iff $\{()\} = Q(\mathbf{I})$, otherwise \enquote{no}.}
+\KwIn{A boolean relational conjunctive query with unary relational symbols $\query{Q}{}{L}$ where $L$ are relational atoms, a database instance $\dbi$.}
+\KwOut{\enquote{yes} iff $\{()\} = Q(\dbi)$, otherwise \enquote{no}.}
 Let $\bar{x} = (x_1, \ldots x_n)$ contain all variables of $Q$ in arbitrary order.\\
 \ForEach{$i \in \{1, \ldots, n\}$}{
-	$R_{x_i} := adom(\mathbf{I})$
+	$R_{x_i} := adom(\dbi)$
 }
 \ForEach{$R(x_i) \in L$ with $i \in \{1, \ldots, n\}$}{
 	%\If{$x = x_i$ with $i \in \{1, \dots, n\}$}{
-	$R_{x_i} := R_{x_i} \cap R(\mathbf{I})$\\
+	$R_{x_i} := R_{x_i} \cap R(\dbi)$\\
 	\If{$R_{x_i} = \emptyset$}{\Return{\enquote{no}}}
 	%}
 	%\Else{
@@ -106,11 +116,11 @@ Let $\bar{x} = (x_1, \ldots x_n)$ contain all variables of $Q$ in arbitrary orde
 %	\If{$R_{x_i} = \emptyset$}{\Return{\enquote{no}}}
 %}
 \Return{\enquote{yes}}
-\caption{$\mathsf{RelUnaryEval}(Q,\mathbf{I})$}
+\caption{$\mathsf{RelUnaryEval}(Q,\dbi)$}
 \label{alg:rue}
 \end{algorithm}
 
-The loop in lines 1-3 takes time in $\mathcal{O}(n \cdot |adom(\mathbf{I})|)$, since it copies the active domain of the database instance $n$ times. The loop in lines 4-6 takes time in $\mathcal{O}(|L| \cdot |adom(\mathbf{I})|^2)$: For every relational atom in the body of the query it computes an intersection, where the upper bound of the size of both intersected sets is the size of the active domain of the database instance. Finally, the containment checks in the loop in lines 7-11 take time in $\mathcal{O}(n \cdot |adom(\mathbf{I})|)$ in the worst case. We observe that the loop in lines 4-6 dominates the time-behavior of the algorithm and relax $adom(\mathbf{I})$ to $|\mathbf{I}|$ and $|L|$ as well as $n$ to $|Q|$, which yields an overall bound of $\mathcal{O}(|Q| \cdot |\mathbf{I}|^2)$. If we assume $Q$ (respectively $\mathbf{•}thbf{I}$) of constant size, we arrive at  $\mathcal{O}(|\mathbf{I}|^2)$ (respectively $\mathcal{O}(|Q|)$).
+The loop in lines 1-3 takes time in $\bigo(n \cdot |adom(\dbi)|)$, since it copies the active domain of the database instance $n$ times. The loop in lines 4-6 takes time in $\bigo(|L| \cdot |adom(\dbi)|^2)$: For every relational atom in the body of the query it computes an intersection, where the upper bound of the size of both intersected sets is the size of the active domain of the database instance. Finally, the containment checks in the loop in lines 7-11 take time in $\bigo(n \cdot |adom(\dbi)|)$ in the worst case. We observe that the loop in lines 4-6 dominates the time-behavior of the algorithm and relax $adom(\dbi)$ to $|\dbi|$ and $|L|$ as well as $n$ to $|Q|$, which yields an overall bound of $\bigo(|Q| \cdot |\dbi|^2)$. If we assume $Q$ (respectively $\dbi$) of constant size, we arrive at  $\bigo(|\dbi|^2)$ (respectively $\bigo(|Q|)$).
 }
 
 \paragraph{General Conjunctive Queries}{We consider the larger class of general conjunctive queries of the form $\query{Q}{x_1, \dots, x_n}{L,M}$ where all elements of $L$ are relational atoms of arity one and elements of $M$ are atoms over the built-in predicates $<$, $\leq$ and $\not =$.
@@ -125,11 +135,11 @@ Question: & Is it possible to find a labeling $\alpha : V \rightarrow \{r, g, b\
 \end{tabular}
 \end{center}
 
-Let $\mathbf{I}_{3} = \{ R(c_r), R(c_g), R(c_b) \}$, and $\mathcal{V}$ be an arbitrary infinite set of variable symbols and $\tilde{\cdot} : V \rightarrow \mathcal{V}$ be an injective function that maps a vertex $v \in V$ to an arbitrary variable symbol in $\mathcal{V}$.
+Let $\dbi_{3} = \{ R(c_r), R(c_g), R(c_b) \}$, and $\mathcal{V}$ be an arbitrary infinite set of variable symbols and $\tilde{\cdot} : V \rightarrow \mathcal{V}$ be an injective function that maps a vertex $v \in V$ to an arbitrary variable symbol in $\mathcal{V}$.
 
 Further, let $\query{Q_G}{}{L,M}$ be a (boolean) general conjunctive query where $L = \{ R(\tilde{v}) \mid v \in V \}$ and $M = \{ \tilde{v} \not = \tilde{u} \mid (v, u) \in E\}$.
 
-We show that for a given directed graph $G$, a labeling $\alpha$ (with the property required by the Graph Coloring Problem) exists if-and-only-if $Q_G(\mathbf{I}_3)
+We show that for a given directed graph $G$, a labeling $\alpha$ (with the property required by the Graph Coloring Problem) exists if-and-only-if $Q_G(\dbi_3)
  = \{ () \}$.
 
 To see the if-direction: Let $\alpha$ by \dots
