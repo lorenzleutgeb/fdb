@@ -41,9 +41,10 @@ Anastassiya Pustozerova\\\texttt{anastassiya.pustozerova@stud-inf.unibz.it}
 We let $n = |\dbi|$.
 
 \paragraph{Circle Query}{
+Algorithm \ref{alg:circle} computes answers for $C_k$. The join in line 3 joins two relations of at most rows $n$ and results a relation of at most $n$ rows. This requires $\bigo(n \log n)$ steps. Note that the join in line 3 is executed $k - 1$ times, since it is inside a loop. The selection and projection in line 5 can be achieved by a single scan over $R$, thus are in $\bigo(n)$. We arrive at an overall time complexity in $\bigo(k \cdot n \cdot \log n)$ or rather $\bigo(k \cdot |\dbi| \cdot \log |\dbi|)$.
 \begin{algorithm}
 	\KwIn{A positive non-zero integer $k$, a database instance (implicitly).}
-	\KwOut{All the nodes, that lie on a circle of length at least $k$.}
+	\KwOut{A relation that contains all nodes that lie on a circle of length at least $k$.}
 	$R := \rho_{start \: \leftarrow\: 1, end\: \leftarrow\: 2}(edge)$\\
 	\ForEach{$i \in \{1, \ldots, k - 1\}$}{
 		$R := \rho_{end \:\leftarrow\:2} (\pi_{start, 2}(R \bowtie_{end = 1} edge))$\\
@@ -52,28 +53,24 @@ We let $n = |\dbi|$.
 	\caption{$\mathsf{EvalCircle}(k)$}
 	\label{alg:circle}
 \end{algorithm}
-
-Algorithm \ref{alg:circle} computes answers for $C_k$. The join in line 3 joins two relations of at most rows $n$ and results a relation of at most $n$ rows. This requires $\bigo(n \log n)$ steps. Note that the join in line 3 is executed $k - 1$ times, since it is inside a loop. The selection and projection in line 5 can be achieved by a single scan over $R$, thus are in $\bigo(n)$. We arrive at an overall time complexity in $\bigo(k \cdot n \cdot \log n)$ or rather $\bigo(k \cdot |\dbi| \cdot \log |\dbi|)$.
 }
 
 \paragraph{Star Query}{
-
+We exploit the fact that the query does not require $z_1, \ldots, z_k$ to be pairwise different, so $\alpha(z_1) = \cdots = \alpha(z_k)$ where all $z_i$ ($1 \leq i \leq k$) map to the same successor of $\alpha(x)$ will be an assignment for an answer to $S_k$. Time complexity of Algorithm \ref{alg:star} is in $\bigo(|\dbi|)$, since a single scan over all edges suffices.
 \begin{algorithm}
 \KwIn{A positive non-zero integer $k$, a database instance (implicitly).}
-\KwOut{All the nodes, that are in the center of a star of at least $k$ nodes.}
-\Return{$\Pi_{edge.1}$}
+\KwOut{A relation that contains all nodes that are in the center of a star of at least $k$ nodes.}
+\Return{$\Pi_{1}(edge)$}
 \caption{$\mathsf{EvalStar}(k)$}
 \label{alg:star}
 \end{algorithm}
-
-Time complexity of Algorithm \ref{alg:star} is in $\bigo(n) = \bigo(|\dbi|)$, a single scan over all edges suffices.
 }
 
 \paragraph{Spider-Web Query}{
-% Copy what was on the blackboard.
+Consider Algorithm \ref{alg:web}: The time complexity of line 1 is in $\bigo(n \cdot \log n)$ and the analysis for lines 2-5 is similar to the $\mathsf{EvalCircle}$. We arrive at a time complexity in $\bigo(k \cdot n \cdot \log n)$ for the algorithm.
 \begin{algorithm}
 	\KwIn{A positive non-zero integer $k$, a database instance (implicitly).}
-	\KwOut{All the nodes, that are in the center of a spider web of size $k$.}
+	\KwOut{A relation that contains all nodes that are in the center of a spider web of size at least $k$.}
 	$R := \rho_{center \: \leftarrow\: 1, start\: \leftarrow\: 2}(edge) \bowtie \rho_{start\: \leftarrow\: 1, end\: \leftarrow\: 2}(edge)$\\
 	\ForEach{$i \in \{1, \ldots, k - 1\}$}{
 		$R := \rho_{end \:\leftarrow\:2} (\pi_{center, start, 2}(R \bowtie_{end = 1} edge))$\\
@@ -82,20 +79,26 @@ Time complexity of Algorithm \ref{alg:star} is in $\bigo(n) = \bigo(|\dbi|)$, a 
 	\caption{$\mathsf{EvalSpiderWeb}(k)$}
 	\label{alg:web}
 \end{algorithm}
-
-Consider Algorithm \ref{alg:web}: The time complexity of line 1 is in $\bigo(n \cdot \log n)$ and the analysis for lines 2-5 is similar to the $\mathsf{EvalCircle}$. We arrive at a time complexity in $\bigo(k \cdot n \cdot \log n)$ for the algorithm.
 }
 
 \paragraph{Clique Query}{The clique problem (for varying $k$) is known to be NP-complete (and a reduction from it is obvious). Time complexity of a guess-and-check algorithm is in $\bigo(n^k \cdot k^2)$ where $n^k$ is an upper bound for the number of possible cliques (subsets of $k$ nodes of the original graph) to guess and checking full connectedness for $k$ takes $k^2$ steps.}
 
 \section{Evaluation of Conjunctive Queries with Unary Relation Symbols}
 
-We address two classes of queries separately.
+We address two classes of queries separately. First, we restate the evaluation problem for conjunctive queries restricted to Boolean queries.
 
-\paragraph{Relational Queries}{We consider boolean relational queries of the form $\query{Q_n}{}{L}$ where all elements of $L$ are relational atoms of arity one and $n$ indicates the number of existentially quantified variables occurring in $L$. Algorithm \ref{alg:rue} solves \textbf{query evaluation for these queries in polynomial time}. This stems from the fundamental insight that computing the union of two sets $R_1$ and $R_2$ can be achieved in time $\bigo(|R_1| \cdot |R_2|)$ (not assuming that the sets can be accessed exploiting some order on the elements). The idea behind the algorithm is to start with the maximal set of answers possible, which is $adom(\dbi)^n$ (without an explicit construction) and then mimimize this set using the relational atoms in the body of the query. For every variable $x_i$ ($1 \leq i \leq n$), an intermediate relation $R_{x_i}$ is introduced and initialized to equal $adom(\dbi)$. Then for every relational atom in which one of the variables occurs $R(x_i)$ ($1 \leq i \leq n$) the corresponding intermediate relation $R_{x_i}$ is filtered by $R$ accordingly by intersecting the two sets.
+\begin{center}
+\textbf{Evaluation Problem for a single Boolean Conjunctive Query}\\[1mm]
+\begin{tabular}{rp{14cm}}
+Given: & A database instance $\dbi$, and a boolean conjunctive query $\query{Q}{}{L, M}$ (where $L$ are relational atoms and $M$ are atoms over built-ins). \\
+Question: & Does there exist a variable assignment $\alpha$ for the variables of $Q$ such that $\alpha(L) \subseteq \dbi$ and $\alpha \models M$, or equivalenty, does  $\{()\} = Q(\dbi)$ hold?
+\end{tabular}
+\end{center}
+
+\paragraph{Relational Queries}{We consider boolean relational queries of the form $\query{Q_n}{}{L}$ where all elements of $L$ are relational atoms of arity one and $n$ indicates the number of existentially quantified variables occurring in $L$. Algorithm \ref{alg:rue} solves \textbf{query evaluation for these queries in polynomial time}. The key insight is that computing the union of two sets $R_1$ and $R_2$ can be achieved in time $\bigo(|R_1| \cdot |R_2|)$ (not assuming that the sets can be accessed exploiting some order on the elements). The idea behind the algorithm is to start with the maximal set of answers possible, which is $adom(\dbi)^n$ (without an explicit construction) and then mimimize this set using the relational atoms in the body of the query. For every variable $x_i$ ($1 \leq i \leq n$), an intermediate relation $R_{x_i}$ is introduced and initialized to equal $adom(\dbi)$. Then for every relational atom in which one of the variables occurs $R(x_i)$ ($1 \leq i \leq n$) the corresponding intermediate relation $R_{x_i}$ is filtered by $R$ accordingly by intersecting the two sets.
 
 \begin{algorithm}
-\KwIn{A boolean relational conjunctive query with unary relational symbols $\query{Q}{}{L}$ where $L$ are relational atoms, a database instance $\dbi$.}
+\KwIn{A boolean relational conjunctive query with unary relational symbols $\query{Q_n}{}{L}$ where $L$ are relational atoms, a database instance $\dbi$.}
 \KwOut{\enquote{yes} iff $\{()\} = Q(\dbi)$, otherwise \enquote{no}.}
 Let $\bar{x} = (x_1, \ldots x_n)$ contain all variables of $Q$ in arbitrary order.\\
 \ForEach{$i \in \{1, \ldots, n\}$}{
@@ -113,7 +116,7 @@ Let $\bar{x} = (x_1, \ldots x_n)$ contain all variables of $Q$ in arbitrary orde
 	}
 }
 \Return{\enquote{yes}}
-\caption{$\mathsf{RelUnaryEval}(Q,\dbi)$}
+\caption{$\mathsf{EvalRelUnary}(Q,\dbi)$}
 \label{alg:rue}
 \end{algorithm}
 
@@ -128,20 +131,18 @@ We show that query evaluation for this class of queries is \textbf{NP-hard by re
 \textbf{Graph Coloring Problem}\\[1mm]
 \begin{tabular}{rp{14cm}}
 Given: & A directed graph $G = (V, E)$. \\
-Question: & Is it possible to find a labeling $\alpha : V \rightarrow \{r, g, b\}$ with the property that for all $v, u \in V$ with $(v, u) \in E$ we have $\alpha(v) \not = \alpha(u)$.
+Question: & Does there exist a total labeling function $\alpha : V \rightarrow \{r, g, b\}$ such that for all $(v, u) \in E$ we have $\alpha(v) \not = \alpha(u)$.
 \end{tabular}
 \end{center}
 
-Let $\dbi_{3} = \{ C(r), C(g), C(b) \}$, and take $V$ as a set of variables (more formally, one may introduce $\mathcal{V}$ as an arbitrary infinite set of variable symbols and $\tilde{\cdot} : V \rightarrow \mathcal{V}$ as an injective function that maps a vertex $v \in V$ to an arbitrary variable symbol in $\mathcal{V}$).
-
-Further, let $\query{Q_G}{}{L,M}$ be a (boolean) general conjunctive query where $L = \{ C(\tilde{v}) \mid v \in V \}$ and $M = \{ \tilde{v} \not = \tilde{u} \mid (v, u) \in E\}$.
+Let $\dbi_{3} = \{ C(r), C(g), C(b) \}$, and take $V$ as a set of variables.\footnote{More formally, one may introduce $\mathcal{V}$ as an arbitrary infinite set of variable symbols and $\tilde{\cdot} : V \rightarrow \mathcal{V}$ as an injective function that maps a vertex $v \in V$ to an arbitrary variable symbol in $\mathcal{V}$.} Further, let $\query{Q_G}{}{L,M}$ be a (boolean) general conjunctive query where $L = \{ C(v) \mid v \in V \}$ and $M = \{ v \not = u \mid (v, u) \in E\}$.
 
 \begin{claim}
-For a given directed graph $G$, a labeling $\alpha$ (with the property required by the Graph Coloring Problem) exists if-and-only-if $Q_G(\dbi_3) = \{ () \}$.
+For a given directed graph $G$, the answer to the Graph Coloring Problem is \enquote{yes} if-and-only-if the answer to the Evaluation Problem for a single Boolean Conjunctive Query is \enquote{yes} for $Q_G$.
 \end{claim}
 
 \begin{proof}
-To see the if-direction: Let $\alpha$ be a labeling for $G$ according to the requirements of the Graph Coloring Problem by assumption. Then $\bar{c} = ()$ is an answer tuple for $Q_G$ over $\dbi_3$ with the assignment $\alpha$: Vacuously $\bar{c} = \alpha(())$ (boolean query), $\alpha(v) \in \dbi_3(C)$ follows from the definition of $\alpha$ and the definition of $\dbi_3$ since the range of $\alpha$ is the same as $\dbi_3(C)$, and finally $\alpha \models M$ since the property imposed by the definition of the Graph Coloring Problem and the inequalities  in $M$ coincide.
+To see the if-direction: Let $\alpha$ be a labeling for $G$ according to the requirements of the Graph Coloring Problem by assumption. Then we need to show that $\bar{c} = ()$ is an answer tuple for $Q_G$ over $\dbi_3$ with the assignment $\alpha$: Vacuously $\bar{c} = \alpha(())$ (boolean query), $\alpha(v) \in \dbi_3(C)$ follows from the definition of $\alpha$ and the definition of $\dbi_3$ since the range of $\alpha$ is the same as $\dbi_3(C)$, and finally $\alpha \models M$ since the property imposed by the definition of the Graph Coloring Problem and the inequalities in $M$ coincide.
 
 To see the only-if direction: Let $\bar{c} = ()$ be an answer tuple for $Q_G$ over $\dbi_3$ with the assignment $\alpha$ by assumption. Then we show that $\alpha$ is a labeling for $G$ as required by the Graph Coloring Problem: By $\alpha(v) \in \dbi_3(C)$ we have that the domain of $\alpha$ is at most $\{r, g, b\}$ and the inequalities in $M$ guarantee the required properties for $\alpha$.
 \end{proof}
