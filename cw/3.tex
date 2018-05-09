@@ -149,11 +149,11 @@ To see the only-if direction: Let $\bar{c} = ()$ be an answer tuple for $Q_G$ ov
 
 \section{Containment of Relational Conjunctive Queries without Self Joins}
 
-Given two relational conjunctive queries without self joins $Q$ and $Q'$ and the question $Q \stackrel{?}{\sqsubseteq} Q'$, our idea is to implement an algorithm that checks whether it is possible to find a query homomorphism $h : \mathcal{T}(Q') \rightarrow \mathcal{T}(Q)$ . By the Chandra-Merlin theorem $h$ exists if-and-only-if $Q \sqsubseteq Q'$ (note that we consider queries without built-ins).
+Given two relational conjunctive queries without self joins $Q(\bar{x})$ and $Q'(\bar{x'})$ and the question $Q \stackrel{?}{\sqsubseteq} Q'$, our idea is to implement an algorithm that checks whether it is possible to find a query homomorphism $h : \mathcal{T}(Q') \rightarrow \mathcal{T}(Q)$ . By the Chandra-Merlin theorem $h$ exists if-and-only-if $Q \sqsubseteq Q'$ (note that we consider queries without built-ins).
 
-In the lecture we saw two different definitions for query homomorphisms. The more strict one is defined in the slides (Part 4: Conjunctive Queries, slide 26). In the lecture we discovered a more general definition, where they key difference is how distinguished variables are handled. From the definition on slides distinguished variable must be mapped to itself $h(x)=x$, in general case distinguished variable must be unifiable with other term ?? $h(x)=h(x')$ ??
+In the lecture we saw two different definitions for query homomorphisms. The more strict one is defined in the slides (Part 4: Conjunctive Queries, slide 26). In the lecture we discovered a more general definition, where they key difference is how distinguished variables are handled: By the definition on the slides, distinguished variables must be mapped to themselves, i.e.\ $h(x'_i) = x'_i$ where $\bar{x'} = (x'_1, \ldots, x'_n)$ and $1 \leq i \leq n$, while for the more general definition, distinguished variables must agree under $h$, i.e.\ $h(\bar{x'}) = h(\bar{x})$.
 
-Algorithm \ref{alg:homstrict} decides the existance of a homomorphism according to the stricter definition (see lines 16-21), and below we describe a procedure that addresses the more general setting:
+Algorithm \ref{alg:homstrict} decides the existence of a homomorphism according to the stricter definition (see lines 16-21).
 
 \begin{algorithm}
 \KwIn{Two relational queries without self join $\query{Q}{\bar{x}}{L}$ and $\query{Q'}{\bar{x'}}{L'}$.}
@@ -166,15 +166,15 @@ $f := \top$\\
 \ForEach{$i \in \{1, \ldots, n\}$}{
 \Switch{on the type of $t'_i$}{
 	\Case{constant}{
-		\If{$t_i$ is a constant and $t_i=t'_i$}{\textbf{continue}}
+		\If{$t_i$ is a constant and $t_i = t'_i$}{\textbf{continue}}
 		\Return{\enquote{no}}, since some constant would not be mapped to itself, violating $h(c) = c$.
 	}
 	\Case{distinguished variable in $Q'$}{
-		\If{$t_i$ is a distinguished variable in $Q$ and $t_i= t'_i$}{\textbf{continue}}
+		\If{$t_i$ is a distinguished variable in $Q$ and $t_i = t'_i$}{\textbf{continue}}
 		\Return{\enquote{no}}, since some distinguished variable would not be mapped to itself, violating $h(x) = x$.
 	}
 	\Case{non-distinguished variable}{
-		$t'_i$ may be mapped to other variables or constants.\\
+		// $t'_i$ may be mapped to other variables or constants.\\
 		\textbf{continue}
 	}
 }
@@ -194,27 +194,40 @@ $f := \top$\\
 \label{alg:homstrict}
 \end{algorithm}
 
-For the more general definition, we want to reduce the decision problem of the existence of a homomorphism $h : \mathcal{T}(Q') \rightarrow \mathcal{T}(Q)$ to term matching.
+For the more general definition, we want to reduce the decision problem of the existence of a homomorphism $h : \mathcal{T}(Q') \rightarrow \mathcal{T}(Q)$ to term matching. Intuitively, matchers and query homomorphisms coincide.
 
 \begin{algorithm}
 \KwIn{Two relational queries without self join $\query{Q}{\bar{x}}{L}$ and $\query{Q'}{\bar{x'}}{L'}$.}
 \KwOut{\enquote{yes} iff $Q \sqsubseteq Q'$, otherwise \enquote{no}.}
-$\mathcal{U} := \emptyset$\\
+\If{$|\bar{x}| \neq |\bar{x'}|$}{\Return{\enquote{no}}}
+Let $\bar{x} = (x_1, \ldots , x_m)$ and $\bar{x'} = (x'_1, \ldots, x'_m)$.\\
+$\theta := \varepsilon$ (a substitution/mapping from variables to terms also called \enquote{matcher})\\
+$\mathcal{M} := \{ x_i \approx x'_i \mid 1 \leq i \leq m \}$ (a matching problem)\\
 
 \ForEach{relational atom $R(t'_1, \ldots, t'_n) \in L'$}{
 	\If{$R(t_1, \ldots, t_n) \not \in L$}{\Return{\enquote{no}}}
-	$\mathcal{U} := \mathcal{U} \cup \{ t'_1 \approx t_1, \ldots, t'_n \approx t_n \}$ where $R(t_1, \ldots, t_n) \in L$\\
+	$\mathcal{M} := \mathcal{M} \cup \{ t'_1 \approx t_1, \ldots, t'_n \approx t_n \}$ where $R(t_1, \ldots, t_n) \in L$\\
 }
 
-\While{$\mathcal{U} \not = \emptyset$}{
-	Select an equation $s \approx t$ from $\mathcal{U}$.\\
-	\If{there is solution for matching problem $s \approx t$ }
-	{$\mathcal{U} := \mathcal{U} \setminus \{ s \approx t \}$}	
+\While{$\mathcal{M} \not = \emptyset$}{
+	Select an equation $s \approx t$ from $\mathcal{M}$.\\
+	$\mathcal{M} := \mathcal{M} \setminus \{ s \approx t \}$\\
+	\Switch{depending on the structure of $s \approx t$}{
+		\Case{$x \approx x$ (same variable on both sides)}{
+		nothing}
+		\Case{$c \approx d$ where $c \neq d$ (different constants)}{\Return{\enquote{no}, analogously to decomposition of different functions in unification.}}
+		\Case{$x \approx t$ or $t \approx x$ (variable on one side and term on the other side)}{
+			$\theta := \theta\{x \mapsto t\}$ to extend the matcher and apply the substitution to existing mappings.\\
+			$\mathcal{M} := \mathcal{M}\{x \mapsto t\}$ to apply the substitution to the remaining matching problem.
+		}
+	}
 }
 \Return{\enquote{yes}}
 \caption{$\mathsf{NoSelfJoinContained}(Q, Q')$}
 \label{alg:homgen}
 \end{algorithm}
+
+Line 18 depends on the definition of substitutions to be used. Commonly substitutions are defined to map variables to themselves \enquote{by default}. If this is not the case, then $x \mapsto x$ must be added to $\theta$ here.
 
 % Comment why we require distinguished variables to map to themselves. More general definition of a homomorphism is possible and we saw one in the lecture, but the one on the slides is stricter.
 \end{document}
