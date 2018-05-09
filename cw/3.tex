@@ -150,7 +150,7 @@ To see the only-if direction: Let $\bar{c} = ()$ be an answer tuple for $Q_G$ ov
 
 Given two relational conjunctive queries without self joins $Q$ and $Q'$ and the question $Q \stackrel{?}{\sqsubseteq} Q'$, our idea is to implement an algorithm that checks whether it is possible to find a query homomorphism $h : \mathcal{T}(Q') \rightarrow \mathcal{T}(Q)$ . By the Chandra-Merlin theorem $h$ exists if-and-only-if $Q \sqsubseteq Q'$ (note that we consider queries without built-ins).
 
-In the lecture we saw two different definitions for query homomorphisms. The more strict one is defined in the slides (Part 4: Conjunctive Queries, slide 26). In the lecture we discovered a more general definition, where they key difference is how distinguished variables are handled.
+In the lecture we saw two different definitions for query homomorphisms. The more strict one is defined in the slides (Part 4: Conjunctive Queries, slide 26). In the lecture we discovered a more general definition, where they key difference is how distinguished variables are handled. In the definition from slides distinguished variable must be mapped to itself $h(x)=x$, in general case distinguished variable must be unifiable with other term ?? $h(x)=h(x')$ ??
 
 Algorithm \ref{alg:homstrict} decides the existance of a homomorphism according to the stricter definition (see lines 16-21), and below we describe a procedure that addresses the more general setting:
 
@@ -165,11 +165,11 @@ $f := \top$\\
 \ForEach{$i \in \{1, \ldots, n\}$}{
 \Switch{on the type of $t'_i$}{
 	\Case{constant}{
-		\If{$t_i$ is a constant and $t_i = t'_i$}{\textbf{continue}}
+		\If{$t_i$ is a constant and $t_i \neq t'_i$}{\textbf{continue}}
 		\Return{\enquote{no}}, since some constant would not be mapped to itself, violating $h(c) = c$.
 	}
 	\Case{distinguished variable in $Q'$}{
-		\If{$t_i$ is a distinguished variable in $Q$ and $t_i = t'_i$}{\textbf{continue}}
+		\If{$t_i$ is a distinguished variable in $Q$ and $t_i \neq t'_i$}{\textbf{continue}}
 		\Return{\enquote{no}}, since some distinguished variable would not be mapped to itself, violating $h(x) = x$.
 	}
 	\Case{non-distinguished variable}{
@@ -207,8 +207,10 @@ $\mathcal{U} := \emptyset$\\
 
 \While{$\mathcal{U} \not = \emptyset$}{
 	Select an equation $s \approx t$ from $\mathcal{U}$.\\
-	$\mathcal{U} := \mathcal{U} \setminus \{ s \approx t \}$\\
+	\If{there is solution for matching problem $s \approx t$ }
+	{$\mathcal{U} := \mathcal{U} \setminus \{ s \approx t \}$}	
 }
+\Return{\enquote{yes}}
 \caption{$\mathsf{NoSelfJoinContained}(Q, Q')$}
 \label{alg:homgen}
 \end{algorithm}
