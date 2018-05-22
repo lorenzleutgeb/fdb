@@ -1,0 +1,2 @@
+$Q=Q^'$ implies that $Q^' \subseteq Q$ . Exist an homomorphism h from Q' to Q, h' from Q to Q'. If we compose the two functions h h' we ensure that exist an homomorphism from Q' to a query Q? such that it is subquery of Q. Q? has at most m relation symbols otherwise the homomorphism wouldnot exist (Q? not subset of Q')
+

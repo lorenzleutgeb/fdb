@@ -1,0 +1,8 @@
+let assume that exist two functions f and g both injective (((and surjective (is it needed?)))) $f: V \implies V$ $g: V \implies V$. We assume that undistinguished varibles are mapped to themselves (because of the definition of homomorphism).
+Since Q and Q' are equivalent it holds that $Q \subseteq Q^'$. This means that there exist an homomorphism h from Q' to Q. We claim that there exist an homomorphism h' from f(Q') to g(Q). 
+SInce the new homomorphism h' is injective (  composition of two injective functions) and it has the same structure of h we conclude that h' is an homomorphism.
+1)$h'(c) = c $ for every constant c (by definition)
+2)$h'(x) = x$ for every undistinguished variable (by definition)
+3)$h'(f(L')) \subseteq g(L)$ because the structure of h is preserved
+
+The other way is anologous.
