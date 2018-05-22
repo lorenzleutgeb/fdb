@@ -1,0 +1,137 @@
+\documentclass[a4paper,12pt]{article} 
+
+\usepackage[a4paper, top=3cm, bottom=3cm, left=2cm, right=2cm]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{cmap}					% поиск в PDF
+\usepackage[utf8]{inputenc}			% кодировка исходного текста
+\usepackage[english]{babel}     	% локализация и переносы
+\usepackage{csquotes}
+\usepackage{multicol}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+\bibliographystyle{abbrv}
+
+\usepackage[ruled,linesnumbered]{algorithm2e}
+
+\newtheorem{claim}{Claim}
+\newtheorem{prop}{Proposition}
+
+\newcommand{\cq}[1]{\ensuremath{\mathsf{CQ}_{#1}}}
+\newcommand{\dbi}{\ensuremath{\mathbf{I}}}
+\newcommand{\bigo}{\ensuremath{\mathcal{O}}}
+\newcommand{\query}[3]{\ensuremath{{#1}({#2})\:{:}{-}\:{#3}}}
+\newcommand{\rr}{\mathsf{RR}}
+\newcommand{\ranf}{\mathsf{RANF}}
+\newcommand{\srnf}{\mathsf{SRNF}}
+\renewcommand{\phi}{\varphi}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Foundations of Databases}\\[3mm]
+
+{\Large Coursework 4}\\[5mm]
+
+Lorenz Leutgeb\\\texttt{lorenz.leutgeb@stud-inf.unibz.it}\\[2mm]
+Cosimo Damiano Persia\\\texttt{cosimodamiano.persia@stud-inf.unibz.it}
+\end{center}
+
+\section{Containment of Selfjoin-free Conjunctive Queries with Built-ins}
+
+This problem can be solved in polynomial time. We consider $\query{Q}{\bar{s}}{L, M} \stackrel{?}{\sqsubseteq} \query{Q'}{\bar{s'}}{L', M'}$ and assume that whenever $M \models s = t$, then $s = t$ are syntactically equal (see hint).
+
+First, construct $\query{Q_0}{\bar{s_0}}{L}$ and $\query{Q'_0}{\bar{s'_0}}{L'}$ (where distinguished variables that only occur in the built-in part of the body are removed). Use the polynomial time algorithm from the previous question to check $Q_0 \stackrel{?}{\sqsubseteq} Q'_0$. If this containment does not hold, then the original containment does not hold as well.
+
+Consequently, we treat the case where $Q_0 \sqsubseteq Q'_0$ holds. Since this inclusions holds, there is a query homomorphism $h : \mathcal{T}(Q'_0) \rightarrow \mathcal{T}(Q_0)$. %From here, we use the built-in atoms from $M, M'$ to extend $h$.
+
+What remains to be checked is that $M \models h(M')$. Equivalently, we may check whether $M \cup \neg h(M)$\footnote{With $\neg \cdot : x \leq y \mapsto x > y, x < y \mapsto x \geq y, x = y \mapsto x \neq y, \ldots$ and $\neg A = \{ \neg x \mid x \in A\}$.} is unsatisfiable (cf.\ Deduction Theorem, SAT). Without loss of generality we assume that all built-ins in $\neg h(M)$ and $M'$ are either $>$, $\neq$, or $\geq$. Construct a graph with one set of nodes and two different sets/types of edges. The set of nodes corresponds to variables in $ \cup \neg h(M)$, and edges correspond to built-in atoms. Edge type 1 corresponds to $>$ and $\neq$, while edges of type 2 correspond to $\geq$.
+
+If there is a cycle with edges of mixed type in the graph, then $M \models h(M')$, thus the original inclusion does not hold. Otherwise, the original inclusion holds.
+
+% TODO: Correctness.
+
+\section{Injective and Surjective Mappings}
+
+\begin{itemize}
+\item{Given $f : X \rightarrow Y$ and $g : Y \rightarrow Z$ injective functions.
+%Since $f$ is injective, for all $x, x' \in X$ we have $f(x) = f(x')$ implies $x = x'$.
+%Since $g$ is injective, for all $y, y' \in G$ we have $g(y) = g(y')$ implies $z = z'$.
+Let $x, x' \in X$ and assume $g(f(x)) = g(f(x'))$. By injectivity of $g$ we have $f(x) = f(x')$, and by injectivity of $f$ we have that $x = x'$, hence, $g \circ f$ is injective.
+%Since the range of $f$ is $Y$, we may choose $f(x) = y$ and $f(x') = y'$.
+}
+\item{Given $f : X \rightarrow Y$ and $g : Y \rightarrow Z$ surjective functions.
+Let $z \in Z$. By surjectivity of $g$ there exists a $y \in Y$ such that $g(y) = z$. By surjectivity of $f$ there exists a $x in X$ such that $f(x) = y$. By replacing $f(x) = y$ in $g(y) = z$ we get $g(f(x)) = z$, thus $x$ has a preimage in $X$ with respect to $g \circ f$, hence, $g \circ f$ is surjective.
+}
+\item{
+Given $g \circ f$ injective. Then both $g$ and $f$ are injective.
+% TODO: Proof
+}
+\item{
+Given $g \circ f$ surjective. Then both $g$ and $f$ are surjective.
+% TODO: Proof
+}
+\item{
+Given a finite set $X$ and $f : X \rightarrow X$ surjective (injective). Then $f$ is injective (surjective), i.e.\ surjectivity and injectivity coincide with bijectivity.
+% TODO: Proof
+}
+\end{itemize}
+
+\section{Minimisation of Conjunctive Queries}
+
+% HINT: It will be necessary to make use of some facts about injective and surjective mappings on finite sets.
+
+\begin{prop} Let $Q$ be a RCQ with $n$ atoms and $Q'$ be an equivalent RCQ with $m$ atoms where $m < n$. Then there exists a subquery $Q_0$ of $Q$ such that $Q_0$ has at most $m$ atoms in the body and $Q_0$ is equivalent to $Q$.
+\end{prop}
+
+\begin{proof}
+By the Chandra/Merlin theorem, from $Q$ being equivalent to $Q'$ we have two query homomorphisms $h : \mathcal{T}(Q') \rightarrow \mathcal{T}(Q)$ and $h : \mathcal{T}(Q) \rightarrow \mathcal{T}(Q')$.
+
+Next, we show that $Q'$ is a subquery of $Q$. From there, we show that $Q'$ fulfills all conditions for $Q_0$.
+\end{proof}
+
+\begin{prop} Let $Q$ be a RCQ with $n$ atoms and $Q'$ be an equivalent RCQ with $m$ atoms where $m < n$. Then there exists a subquery $Q_0$ of $Q$ such that $Q_0$ has at most $m$ atoms in the body and $Q_0$ is equivalent to $Q$.
+Let $Q$ and $Q_0$ be two equivalent minimal RCQs. Then $Q$ and $Q_0$
+are identical up to renaming of variables.
+\end{prop}
+
+\begin{proof}
+\end{proof}
+
+\section{Containment of Unions of Conjunctive Queries}
+
+By CQ-in-CQ we denote the containment problem for relational queries.
+
+\begin{claim}[UCQ-in-CQ]
+Given a union of conjunctive queries $Q = \bigcup_{i=1}^n Q_i$ and a conjunctive query $Q'$. The containment $Q \sqsubseteq Q'$ holds iff for all $1 \leq i \leq n$ the containment $Q_i \sqsubseteq Q$ holds.
+\end{claim}
+
+UCQ-in-CQ is NP-complete:
+
+\begin{description}
+\item{NP-hard} by reduction from CQ-in-CQ, which is the special case $n = 1$.
+\item{in NP} since an algorithm that iterates over all $Q_j$ and returns a positive answer if $Q_i \sqsubseteq Q$ (which is an NP-complete problem) for all $i$ decides the problem in NP ($n$ times NP is still NP)
+\end{description}
+
+\begin{claim}[CQ-in-UCQ]
+Given a conjunctive query $Q$ and a union of conjunctive queries $Q' = \bigcup_{j=1}^m Q'_j$. The containment $Q \sqsubseteq Q'$ holds iff for some $1 \leq j \leq m$ the containment $Q \sqsubseteq Q_j$ holds.
+\end{claim}
+
+CQ-in-UCQ is NP-complete:
+
+\begin{description}
+\item{NP-hard} by reduction from CQ-in-CQ, which is the special case $m = 1$
+\item{in NP} since an algorithm that iterates over all $Q_j$ and returns a positive answer if $Q_j \not \sqsubseteq Q$ (which is an NP-complete problem) decides the problem in NP ($m$ times NP is still NP)
+\end{description}
+
+\begin{claim}[UCQ-in-UCQ]
+Given a union of conjunctive queries $Q = \bigcup_{i=1}^n Q_i$ and $Q' = \bigcup_{j=1}^m Q'_j$. The containment $Q \sqsubseteq Q'$ holds iff $Q_i \sqsubseteq Q_j$ for all $1 \leq i \leq n$ and for some $1 \leq j \leq m$ the containment $Q_i \sqsubseteq Q_j$ holds.
+\end{claim}
+
+UCQ-in-UCQ is NP-complete:
+
+\begin{description}
+\item{NP-hard} by reduction from CQ-in-CQ, which is the special case $n = m = 1$
+\item{NP} since as above, we may run CQ-in-CQ $n \cdot m$ times (in the worst case).
+\end{description}
+\end{document}
