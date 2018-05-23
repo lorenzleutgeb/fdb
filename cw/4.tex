@@ -73,7 +73,12 @@ Given $g \circ f$ surjective. Then both $g$ and $f$ are surjective.
 }
 \item{
 Given a finite set $X$ and $f : X \rightarrow X$ surjective (injective). Then $f$ is injective (surjective), i.e.\ surjectivity and injectivity coincide with bijectivity.
-% TODO: Proof
+(Let $X$ be a finite set, and $f: X \rightarrow X $ is a function. Then $f$ is injective iff $f$ is surjective.)
+\begin{proof}
+ First, suppose $f$ is injective. If S has $n$ elements, by our assumption, this means the image of $f$ has at least $n$ elements. But the image of $f$ is contained in S, so it has at most $n$ elements; so the image of $f$ contains exactly $n$ elements and is therefore the whole of S, i.e. $f$ is surjective.
+
+ Now, suppose $f$ is surjective. So, for each $y \in S$, there is an $x \in S$ such that $y=f(x)$. We choose one such $x$ for each $y$ and define a function $g:X \rightarrow X$ so that $g(y)=x$. By construction, $f(g(y))=y$, so g must be injective, and hence, must be surjective by the above argument. So $g$ is a bijection, and f is a left inverse for $g$. But a left inverse for a bijection is also a right inverse, so this implies f is a bijection, and then an injection.
+\end{proof}
 }
 \end{itemize}
 
