@@ -85,9 +85,15 @@ Given a finite set $X$ and $f : X \rightarrow X$ surjective (injective). Then $f
 \end{prop}
 
 \begin{proof}
-By the Chandra/Merlin theorem, from $Q$ being equivalent to $Q'$ we have two query homomorphisms $h : \mathcal{T}(Q') \rightarrow \mathcal{T}(Q)$ and $h : \mathcal{T}(Q) \rightarrow \mathcal{T}(Q')$.
+By the Chandra/Merlin theorem, from $Q$ being equivalent to $Q'$ we have two query homomorphisms $h : \mathcal{T}(Q') \rightarrow \mathcal{T}(Q)$ and $h' : \mathcal{T}(Q) \rightarrow \mathcal{T}(Q')$.
 
-Next, we show that $Q'$ is a subquery of $Q$. From there, we show that $Q'$ fulfills all conditions for $Q_0$.
+Next, we assume that $Q'$ is not a subquery of $Q$ towards a contradiction. Since $Q'$ is not a subquery of $Q$, there is some relational atom $R(\bar{t}) \in L'$ such that $R(\bar{t}) \not \in L$. However, this contradicts the existence of $h$, $h'$ as follows: By definition of a query homomorphism, we ha ve $h(L') \subseteq L$, but $h(R(\bar{t}))$ cannot be in $L$.
+
+Next, we show that $Q'$ is a subquery of $Q$: Since $h'$ exists, and $m < n$.
+
+Since 
+
+From there, we show that $Q'$ fulfills all conditions for $Q_0$.
 \end{proof}
 
 \begin{prop} Let $Q$ be a RCQ with $n$ atoms and $Q'$ be an equivalent RCQ with $m$ atoms where $m < n$. Then there exists a subquery $Q_0$ of $Q$ such that $Q_0$ has at most $m$ atoms in the body and $Q_0$ is equivalent to $Q$.
