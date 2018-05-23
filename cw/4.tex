@@ -65,11 +65,17 @@ Let $z \in Z$. By surjectivity of $g$ there exists a $y \in Y$ such that $g(y) =
 }
 \item{
 Given $g \circ f$ injective. Then both $g$ and $f$ are injective.
-% TODO: Proof
+
+First we show $f$ injective: For any $x, x' \in X$ s.t.\ $x \neq x'$ we need to show $f(x) \neq f(x')$. This can be seen by contradiction, since $f(x) = f(x')$ would contradict injectivity of  $g \circ f$, hence $f$ injective.
+
+To see that $g$ is injective, assume towards a contradiction that $g$ is not injective.  Let $x, x' \in X$ s.t.\ $x \neq x'$ and $f(x) = y$ as well as $f(x') = y'$. Since $f$ injective, we have $y \neq y'$. Without loss of generality $g(y) = g(y')$ since $g$ is not injective. However, we reach a contradiction, since $g(f(x)) = g(f(x'))$. Therefore, $g$ must be injective.
 }
 \item{
 Given $g \circ f$ surjective. Then both $g$ and $f$ are surjective.
-% TODO: Proof
+
+First we show that $g$ is surjective: Let $z \in Z$ be arbitrary and $x \in X$ such that $g(f(x)) = z$ (by surjectivity of $g \circ f$). Hence, we can find some $f(x) = y \in Y$ such that $g(y) = z$. So $g$ is surjective.
+
+To show that $f$ is surjective, assume to the contrary that $f$ is not surjective. Then, there is $y \in Y$ such that there is no $x \in X$ with $f(x) = y$. This means that there is no $y \in Y$ such that $z \in Z$ with $g(y) = z$, which contradicts that $g$ is surjective (see previous proof).
 }
 \item{
 Given a finite set $X$ and $f : X \rightarrow X$ surjective (injective). Then $f$ is injective (surjective), i.e.\ surjectivity and injectivity coincide with bijectivity.
