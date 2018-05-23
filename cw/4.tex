@@ -85,15 +85,10 @@ Given a finite set $X$ and $f : X \rightarrow X$ surjective (injective). Then $f
 \end{prop}
 
 \begin{proof}
-By the Chandra/Merlin theorem, from $Q$ being equivalent to $Q'$ we have two query homomorphisms $h : \mathcal{T}(Q') \rightarrow \mathcal{T}(Q)$ and $h' : \mathcal{T}(Q) \rightarrow \mathcal{T}(Q')$.
+the containments $Q \sqsubseteq Q^{'}$ and $Q^{'} \sqsubseteq Q$ hold. By the homomorphism theorem there exist an homomorphism $h : Q \rightarrow Q^{'} $ and $h^{'} : Q^{'} \rightarrow Q $. The composition of the two homomorphisms $\phi : h \circ h^{'}$ applied to L gives as output a new query $\query{Q}{\bar{s}}{L_0}$. $L_0$ has at most m atoms, and $\phi$ is an homomorphism since distinguished variables and constants are mapped to themselves, and $\phi (L) \subseteq L_0$.
+Since $\phi$ is an homomorphism, then the inclusion $Q_0 \sqsubseteq Q$ holds. 
+If we consider the identity homomorphism then also $Q \sqsubseteq Q_0$ holds. Then exist a query $Q_0$ that has at most $m$ atoms and it is equivalent to $Q$.
 
-Next, we assume that $Q'$ is not a subquery of $Q$ towards a contradiction. Since $Q'$ is not a subquery of $Q$, there is some relational atom $R(\bar{t}) \in L'$ such that $R(\bar{t}) \not \in L$. However, this contradicts the existence of $h$, $h'$ as follows: By definition of a query homomorphism, we ha ve $h(L') \subseteq L$, but $h(R(\bar{t}))$ cannot be in $L$.
-
-Next, we show that $Q'$ is a subquery of $Q$: Since $h'$ exists, and $m < n$.
-
-Since 
-
-From there, we show that $Q'$ fulfills all conditions for $Q_0$.
 \end{proof}
 
 \begin{prop} Let $Q$ be a RCQ with $n$ atoms and $Q'$ be an equivalent RCQ with $m$ atoms where $m < n$. Then there exists a subquery $Q_0$ of $Q$ such that $Q_0$ has at most $m$ atoms in the body and $Q_0$ is equivalent to $Q$.
@@ -102,6 +97,9 @@ are identical up to renaming of variables.
 \end{prop}
 
 \begin{proof}
+By the homomorphism theorem there exist an homomorphism $h : Q \rightarrow Q^{'} $ and $h^{'} : Q^{'} \rightarrow Q $. The composition of the two homomorphisms $\phi : h \circ h^{'}$, is surjective and since the domain and the codomain are the same set then the function must also be surjective, then $\phi$ is bijective. From $\phi$ beign bijective, we can conclude that $h$ is injective. Analogously $\phi^{'} : h^{'} \circ h$ is a bijective mapping  and also $h^{'}$ is injective. Since $h$ and $h^{'}$ are  mappings from the same cardinality then $h$ and $h^{'}$ are surjective, and then bijective. Bijectivity of the two homomorphisms mean that the same numbers of variables and constants occur in the queries. Hence the homomorphisms are the renaming of variables and $Q$ and $Q^{'}$ are equal up to renaming of variables.
+
+
 \end{proof}
 
 \section{Containment of Unions of Conjunctive Queries}
