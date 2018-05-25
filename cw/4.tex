@@ -54,36 +54,53 @@ If there is a cycle with edges of mixed type in the graph, then $M \models h(M')
 \section{Injective and Surjective Mappings}
 
 \begin{itemize}
-\item{Given $f : X \rightarrow Y$ and $g : Y \rightarrow Z$ injective functions.
+\item{Given $f : X \rightarrow Y$ and $g : Y \rightarrow Z$ injective functions. then $g \circ f$ injective.
+
 %Since $f$ is injective, for all $x, x' \in X$ we have $f(x) = f(x')$ implies $x = x'$.
 %Since $g$ is injective, for all $y, y' \in G$ we have $g(y) = g(y')$ implies $z = z'$.
+\begin{proof}
 Let $x, x' \in X$ and assume $g(f(x)) = g(f(x'))$. By injectivity of $g$ we have $f(x) = f(x')$, and by injectivity of $f$ we have that $x = x'$, hence, $g \circ f$ is injective.
+\end{proof}
 %Since the range of $f$ is $Y$, we may choose $f(x) = y$ and $f(x') = y'$.
 }
-\item{Given $f : X \rightarrow Y$ and $g : Y \rightarrow Z$ surjective functions.
+\item{Given $f : X \rightarrow Y$ and $g : Y \rightarrow Z$ surjective functions. Then $g \circ f$ surjective.
+
+\begin{proof}
 Let $z \in Z$. By surjectivity of $g$ there exists a $y \in Y$ such that $g(y) = z$. By surjectivity of $f$ there exists a $x in X$ such that $f(x) = y$. By replacing $f(x) = y$ in $g(y) = z$ we get $g(f(x)) = z$, thus $x$ has a preimage in $X$ with respect to $g \circ f$, hence, $g \circ f$ is surjective.
+\end{proof}
 }
 \item{
 Given $g \circ f$ injective. Then both $g$ and $f$ are injective.
 
-First we show $f$ injective: For any $x, x' \in X$ s.t.\ $x \neq x'$ we need to show $f(x) \neq f(x')$. This can be seen by contradiction, since $f(x) = f(x')$ would contradict injectivity of  $g \circ f$, hence $f$ injective.
+\begin{proof}
+For any $x, x' \in X$ s.t.\ $x \neq x'$ we need to show $f(x) \neq f(x')$. This can be seen by contradiction, since $f(x) = f(x')$ would contradict injectivity of  $g \circ f$, hence $f$ injective.
+\end{proof}
 
-To see that $g$ is injective, assume towards a contradiction that $g$ is not injective.  Let $x, x' \in X$ s.t.\ $x \neq x'$ and $f(x) = y$ as well as $f(x') = y'$. Since $f$ injective, we have $y \neq y'$. Without loss of generality $g(y) = g(y')$ since $g$ is not injective. However, we reach a contradiction, since $g(f(x)) = g(f(x'))$. Therefore, $g$ must be injective.
+Given $g \circ f$ injective. Then both $g$ and $f$ are injective.
+
+\begin{proof}
+Assume towards a contradiction that $g$ is not injective.  Let $x, x' \in X$ s.t.\ $x \neq x'$ and $f(x) = y$ as well as $f(x') = y'$. Since $f$ injective, we have $y \neq y'$. Without loss of generality $g(y) = g(y')$ since $g$ is not injective. However, we reach a contradiction, since $g(f(x)) = g(f(x'))$. Therefore, $g$ must be injective.
+\end{proof}
 }
 \item{
-Given $g \circ f$ surjective. Then both $g$ and $f$ are surjective.
+Given $g \circ f$ surjective. Then $g$ is surjective.
 
-First we show that $g$ is surjective: Let $z \in Z$ be arbitrary and $x \in X$ such that $g(f(x)) = z$ (by surjectivity of $g \circ f$). Hence, we can find some $f(x) = y \in Y$ such that $g(y) = z$. So $g$ is surjective.
+\begin{proof}
+Let $z \in Z$ be arbitrary and $x \in X$ such that $g(f(x)) = z$ (by surjectivity of $g \circ f$). Hence, we can find some $f(x) = y \in Y$ such that $g(y) = z$. So $g$ is surjective.
+\end{proof}
 
-To show that $f$ is surjective, assume to the contrary that $f$ is not surjective. Then, there is $y \in Y$ such that there is no $x \in X$ with $f(x) = y$. This means that there is no $y \in Y$ such that $z \in Z$ with $g(y) = z$, which contradicts that $g$ is surjective (see previous proof).
+Given $g \circ f$ surjective. Then $f$ is surjective.
+
+\begin{proof}
+Assume to the contrary that $f$ is not surjective. Then, there is $y \in Y$ such that there is no $x \in X$ with $f(x) = y$. This means that there is no $y \in Y$ such that $z \in Z$ with $g(y) = z$, which contradicts that $g$ is surjective (see previous proof).
+\end{proof}
 }
 \item{
-Given a finite set $X$ and $f : X \rightarrow X$ surjective (injective). Then $f$ is injective (surjective), i.e.\ surjectivity and injectivity coincide with bijectivity.
-(Let $X$ be a finite set, and $f: X \rightarrow X $ is a function. Then $f$ is injective iff $f$ is surjective.)
+Given a finite set $X$ and $f : X \rightarrow X$ surjective (injective). Then $f$ is injective (surjective), i.e.\ surjectivity and injectivity coincide with bijectivity, i.e.\ $f$ is injective iff $f$ is surjective.
 \begin{proof}
  First, suppose $f$ is injective. If S has $n$ elements, by our assumption, this means the image of $f$ has at least $n$ elements. But the image of $f$ is contained in S, so it has at most $n$ elements; so the image of $f$ contains exactly $n$ elements and is therefore the whole of S, i.e. $f$ is surjective.
 
- Now, suppose $f$ is surjective. So, for each $y \in S$, there is an $x \in S$ such that $y=f(x)$. We choose one such $x$ for each $y$ and define a function $g:X \rightarrow X$ so that $g(y)=x$. By construction, $f(g(y))=y$, so g must be injective, and hence, must be surjective by the above argument. So $g$ is a bijection, and f is a left inverse for $g$. But a left inverse for a bijection is also a right inverse, so this implies f is a bijection, and then an injection.
+Now, suppose $f$ is surjective. So, for each $y \in S$, there is an $x \in S$ such that $y=f(x)$. We choose one such $x$ for each $y$ and define a function $g:X \rightarrow X$ so that $g(y)=x$. By construction, $f(g(y))=y$, so g must be injective, and hence, must be surjective by the above argument. So $g$ is a bijection, and f is a left inverse for $g$. But a left inverse for a bijection is also a right inverse, so this implies f is a bijection, and then an injection.
 \end{proof}
 }
 \end{itemize}
