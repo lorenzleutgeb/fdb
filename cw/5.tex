@@ -1,0 +1,73 @@
+\documentclass[a4paper,12pt]{article} 
+
+\usepackage[a4paper, top=3cm, bottom=3cm, left=2cm, right=2cm]{geometry}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage{cmap}					% поиск в PDF
+\usepackage[utf8]{inputenc}			% кодировка исходного текста
+\usepackage[english]{babel}     	% локализация и переносы
+\usepackage{csquotes}
+\usepackage{multicol}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+\bibliographystyle{abbrv}
+
+\usepackage[ruled,linesnumbered]{algorithm2e}
+
+\newtheorem{claim}{Claim}
+\newtheorem{prop}{Proposition}
+
+\newcommand{\cq}[1]{\ensuremath{\mathsf{CQ}_{#1}}}
+\newcommand{\dbi}{\ensuremath{\mathbf{I}}}
+\newcommand{\bigo}{\ensuremath{\mathcal{O}}}
+\newcommand{\query}[3]{\ensuremath{{#1}({#2})\:{:}{-}\:{#3}}}
+\renewcommand{\phi}{\varphi}
+
+\begin{document}
+
+\begin{center}
+{\LARGE\bfseries Foundations of Databases}\\[3mm]
+
+{\Large Coursework 5}\\[5mm]
+
+Lorenz Leutgeb\\\texttt{lorenz.leutgeb@stud-inf.unibz.it}\\[2mm]
+Cosimo Damiano Persia\\\texttt{cosimodamiano.persia@stud-inf.unibz.it}
+\end{center}
+
+\section{Comparison between $rep(\cdot)$ and $Rep(\cdot)$}
+
+\begin{enumerate}
+\item{Yes. %TODO Example.
+}
+\item{
+\begin{itemize}
+\item{No. %TODO Counterexample.
+}
+\item{Yes.  %TODO Proof.
+}
+\end{itemize}
+}
+\end{enumerate}
+
+\section{The Membership Problem for Tables}
+
+% See https://www.sciencedirect.com/science/article/pii/0304397551900072
+
+\subsection{Codd tables}
+
+\subsection{v-tables}
+
+\subsection{c-tables}
+
+\section{The Containment Problem for Codd-Tables and v-Tables}
+
+% See https://www.sciencedirect.com/science/article/pii/0304397551900072
+
+\subsection{Codd tables}
+
+Maybe in P? %TODO Proof
+
+\subsection{v-tables}
+
+Maybe in $\Pi^P_2$? %TODO Check e-tables and i-tables in the article.
+\end{document}
